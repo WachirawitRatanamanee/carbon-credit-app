@@ -26,4 +26,4 @@ export default function App() {
   );
 }
 
-// AppRegistry.registerComponent(appName, () => Main);
+AppRegistry.registerComponent(appName, () => App);
