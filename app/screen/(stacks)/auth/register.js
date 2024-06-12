@@ -58,27 +58,6 @@ export default function Register({ navigation }) {
   };
 
   const handleSubmit = () => {
-    createUserWithEmailAndPassword(auth, username, password)
-      .then(() => {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            const save = set(
-              ref(database, "users/" + user.uid),
-              {
-                username: username,
-                name: name,
-                lastname: lastname,
-                phone: phone,
-              }
-            );
-            console.log(save);
-          }
-        });
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
-
     if (validateForm()) {
       Alert.alert(
         "โปรดตรวจสอบอีกครั้ง",
@@ -97,6 +76,26 @@ export default function Register({ navigation }) {
   };
 
   const sendData = () => {
+    createUserWithEmailAndPassword(auth, username, password)
+      .then(() => {
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            const save = set(
+              ref(database, "users/" + user.uid),
+              {
+                username: username,
+                name: name,
+                lastname: lastname,
+                phone: phone,
+              }
+            );
+          }
+        });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+
     Alert.alert(
       `สมัครสมาชิกสำเร็จ`,
       `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
@@ -136,6 +135,10 @@ export default function Register({ navigation }) {
     }
   };
 
+  const filterNumber = (string) => {
+    setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
   return (
     <ImageBackground
       source={require("../../../../assets/images/login-bg.jpg")}
@@ -151,18 +154,17 @@ export default function Register({ navigation }) {
           <Text style={styles.bigText}>สมัครสมาชิก</Text>
           <View style={styles.inputBox}>
             <View>
-              <Text style={styles.text}>
-                ชื่อผู้ใช้งาน :
-              </Text>
+              <Text style={styles.text}>Email :</Text>
               <View style={styles.form}>
                 <TextInput
                   style={[
                     styles.input,
                     errors.username ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อผู้ใช้งาน"
+                  placeholder="myemail@example.com"
                   value={username}
                   onChangeText={setUsername}
+                  keyboardType="email-address"
                 />
                 {errors.username ? (
                   <Text style={styles.errorText}>
@@ -177,7 +179,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.name ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อ"
+                  placeholder="สุขกาย"
                   value={name}
                   onChangeText={setName}
                 />
@@ -195,7 +197,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.lastname ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกนามสกุล"
+                  placeholder="สบายใจ"
                   value={lastname}
                   onChangeText={setLastname}
                 />
@@ -215,9 +217,9 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.phone ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์"
+                  placeholder="0890001234"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={filterNumber}
                   keyboardType="numeric"
                 />
                 {errors.phone ? (
@@ -241,7 +243,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={showPassword ? "eye" : "eye-off"}
@@ -278,7 +279,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showConfirmPassword}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
-                    placeholder="โปรดยืนยันรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={
