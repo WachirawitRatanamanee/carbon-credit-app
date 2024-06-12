@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { auth, database } from "../../../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { ref, set } from "firebase/database";
+// import { auth, database } from "../../../../firebase";
+// import { createUserWithEmailAndPassword } from "firebase/auth";
+// import { ref, set } from "firebase/database";
 
 export default function Register({ navigation }) {
   const [username, setUsername] = useState("");
@@ -76,25 +76,25 @@ export default function Register({ navigation }) {
   };
 
   const sendData = () => {
-    createUserWithEmailAndPassword(auth, username, password)
-      .then(() => {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            const save = set(
-              ref(database, "users/" + user.uid),
-              {
-                username: username,
-                name: name,
-                lastname: lastname,
-                phone: phone,
-              }
-            );
-          }
-        });
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+    // createUserWithEmailAndPassword(auth, username, password)
+    //   .then(() => {
+    //     auth.onAuthStateChanged((user) => {
+    //       if (user) {
+    //         const save = set(
+    //           ref(database, "users/" + user.uid),
+    //           {
+    //             username: username,
+    //             name: name,
+    //             lastname: lastname,
+    //             phone: phone,
+    //           }
+    //         );
+    //       }
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     alert(error.message);
+    //   });
 
     Alert.alert(
       `สมัครสมาชิกสำเร็จ`,
