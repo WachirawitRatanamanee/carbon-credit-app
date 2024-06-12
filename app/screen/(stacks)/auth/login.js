@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#cefad0",
     padding: 25,
     borderRadius: 15,
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.25,
-    // shadowRadius: 3.84,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 3,
   },
   label: {

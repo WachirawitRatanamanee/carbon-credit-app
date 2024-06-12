@@ -27,7 +27,7 @@ import { LogBox } from 'react-native';
 LogBox.ignoreLogs(['Warning:']); // Ignore log notification by message
 
 export default function HomeScreen({ navigation }) {
-  const isAdmin = false;
+  const isAdmin = true;
   const [isExpand, setIsExpand] = useState(false);
 
   const data = {
@@ -369,13 +369,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
     flex: 1,
-    // textAlignVertical: "center",
+    textAlignVertical: "center",
   },
   tableTextData: {
     textAlign: "center",
     fontSize: 16,
     flex: 1,
-    // textAlignVertical: "center",
+    textAlignVertical: "center",
     padding: 5,
   },
 
