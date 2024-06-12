@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "app/screen/(stacks)/auth/login.js", "app/index.js", "app/screen/(stacks)/edit.js", "components/popup/edit-score.js", "components/popup/tutorial.js", "components/popup/type.js", "app/screen/(stacks)/auth/forgot.js", "app/screen/(stacks)/auth/register.js"  ]
 }
