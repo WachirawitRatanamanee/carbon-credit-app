@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { auth, database } from "../../../../firebase";
+import { ref, set } from "firebase/database";
+import { updatePassword } from "firebase/auth";
 
 export default function Forgot({ navigation }) {
   const [username, setUsername] = useState("");
@@ -36,6 +39,19 @@ export default function Forgot({ navigation }) {
   const validateForm = () => {
     let errors = {};
 
+    if (
+      !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
+        username
+      )
+    ) {
+      errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
+    }
+
+    if (password.length < 6) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
     if (!username)
       errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
     if (!phone) errors.phone = "กรุณากรอกเบอร์โทรศัพท์";
@@ -48,6 +64,29 @@ export default function Forgot({ navigation }) {
 
     setErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const handleError = (error) => {
+    console.log(error);
+    switch (error) {
+      case "auth/account-exists-with-different-credential":
+      case "auth/email-already-in-use":
+        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
+      case "auth/wrong-password":
+        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+      case "auth/user-not-found":
+        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
+      case "auth/user-disabled":
+        return "ผู้ใช้ถูกระงับ";
+      case "auth/too-many-requests":
+        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
+      case "auth/operation-not-allowed":
+        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
+      case "auth/invalid-email":
+        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
+      default:
+        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
+    }
   };
 
   const handleSubmit = () => {
@@ -69,16 +108,27 @@ export default function Forgot({ navigation }) {
   };
 
   const sendData = () => {
-    Alert.alert(
-      `สมัครสมาชิกสำเร็จ`,
-      `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
-      [
-        {
-          text: `ตกลง`,
-        },
-      ]
-    );
-    navigation.goBack();
+    updatePassword(username, password)
+      .then(() => {
+        Alert.alert(
+          `สมัครสมาชิกสำเร็จ`,
+          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
+          [
+            {
+              text: `ตกลง`,
+            },
+          ]
+        );
+        // navigation.goBack();
+      })
+      .catch((error) => {
+        err = handleError(error.code);
+        Alert.alert(`เกิดข้อผิดพลาด`, `${err}`, [
+          {
+            text: `ตกลง`,
+          },
+        ]);
+      });
   };
 
   const cancel = () => {
@@ -102,171 +152,164 @@ export default function Forgot({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../../assets/images/login-bg.jpg")}
-      resizeMode="cover"
-      style={styles.imageBackground}
-      imageStyle={{ opacity: 0.1 }}
+    // <ImageBackground
+    //   source={require("../../../../assets/images/login-bg.jpg")}
+    //   resizeMode="cover"
+    //   style={styles.imageBackground}
+    //   imageStyle={{ opacity: 0.1 }}
+    // >
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={styles.container}
     >
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.container}
-      >
-        <ScrollView>
-          <Text style={styles.bigText}>ลืมรหัสผ่าน</Text>
-          <View style={styles.inputBox}>
-            <View>
-              <Text style={styles.text}>
-                ชื่อผู้ใช้งานของคุณ :
-              </Text>
-              <View style={styles.form}>
+      <ScrollView>
+        <Text style={styles.bigText}>ลืมรหัสผ่าน</Text>
+        <View style={styles.inputBox}>
+          <View>
+            <Text style={styles.text}>
+              ชื่อผู้ใช้งานของคุณ :
+            </Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.username ? styles.ifError : {},
+                ]}
+                value={username}
+                onChangeText={setUsername}
+              />
+              {errors.username ? (
+                <Text style={styles.errorText}>
+                  {errors.username}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>
+              เบอร์โทรศัพท์ของคุณ :
+            </Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.phone ? styles.ifError : {},
+                ]}
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="numeric"
+                maxLength={10}
+              />
+              {errors.phone ? (
+                <Text style={styles.errorText}>
+                  {errors.phone}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>รหัสผ่านใหม่ :</Text>
+            <View style={styles.form}>
+              <View
+                style={[
+                  styles.input,
+                  styles.passwordForm,
+                  errors.password ? styles.ifError : {},
+                ]}
+              >
                 <TextInput
-                  style={[
-                    styles.input,
-                    errors.username ? styles.ifError : {},
-                  ]}
-                  placeholder="โปรดกรอกชื่อผู้ใช้งานของคุณ"
-                  value={username}
-                  onChangeText={setUsername}
+                  style={styles.passwordInput}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
                 />
-                {errors.username ? (
-                  <Text style={styles.errorText}>
-                    {errors.username}
-                  </Text>
-                ) : null}
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye" : "eye-off"}
+                  size={22}
+                  color="#aaa"
+                  style={styles.hiddenIcon}
+                  onPress={toggleShowPassword}
+                />
               </View>
+              {errors.password ? (
+                <Text style={styles.errorText}>
+                  {errors.password}
+                </Text>
+              ) : null}
+            </View>
 
-              <Text style={styles.text}>
-                เบอร์โทรศัพท์ของคุณ :
-              </Text>
-              <View style={styles.form}>
+            <Text style={styles.text}>
+              ยืนยันรหัสผ่าน :
+            </Text>
+
+            <View style={styles.form}>
+              <View
+                style={[
+                  styles.input,
+                  styles.passwordForm,
+                  { marginBottom: 0 },
+                  errors.confirmPassword
+                    ? styles.ifError
+                    : {},
+                ]}
+              >
                 <TextInput
-                  style={[
-                    styles.input,
-                    errors.phone ? styles.ifError : {},
-                  ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์ของคุณ"
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="numeric"
+                  style={styles.passwordInput}
+                  secureTextEntry={!showConfirmPassword}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
                 />
-                {errors.phone ? (
-                  <Text style={styles.errorText}>
-                    {errors.phone}
-                  </Text>
-                ) : null}
+                <MaterialCommunityIcons
+                  name={
+                    showConfirmPassword ? "eye" : "eye-off"
+                  }
+                  size={22}
+                  color="#aaa"
+                  style={styles.hiddenIcon}
+                  onPress={toggleShowConfirmPassword}
+                />
               </View>
-
-              <Text style={styles.text}>
-                รหัสผ่านใหม่ :
-              </Text>
-              <View style={styles.form}>
-                <View
+              {errors.confirmPassword ? (
+                <Text
                   style={[
-                    styles.input,
-                    styles.passwordForm,
-                    errors.password ? styles.ifError : {},
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่านที่ต้องการ"
-                  />
-                  <MaterialCommunityIcons
-                    name={showPassword ? "eye" : "eye-off"}
-                    size={22}
-                    color="#aaa"
-                    style={styles.hiddenIcon}
-                    onPress={toggleShowPassword}
-                  />
-                </View>
-                {errors.password ? (
-                  <Text style={styles.errorText}>
-                    {errors.password}
-                  </Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.text}>
-                ยืนยันรหัสผ่าน :
-              </Text>
-
-              <View style={styles.form}>
-                <View
-                  style={[
-                    styles.input,
-                    styles.passwordForm,
+                    styles.errorText,
                     { marginBottom: 0 },
-                    errors.confirmPassword
-                      ? styles.ifError
-                      : {},
                   ]}
                 >
-                  <TextInput
-                    style={styles.passwordInput}
-                    secureTextEntry={!showConfirmPassword}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    placeholder="โปรดยืนยันรหัสผ่าน"
-                  />
-                  <MaterialCommunityIcons
-                    name={
-                      showConfirmPassword
-                        ? "eye"
-                        : "eye-off"
-                    }
-                    size={22}
-                    color="#aaa"
-                    style={styles.hiddenIcon}
-                    onPress={toggleShowConfirmPassword}
-                  />
-                </View>
-                {errors.confirmPassword ? (
-                  <Text
-                    style={[
-                      styles.errorText,
-                      { marginBottom: 0 },
-                    ]}
-                  >
-                    {errors.confirmPassword}
-                  </Text>
-                ) : null}
-              </View>
-              <View style={styles.buttonContainer}>
-                <TouchableHighlight
-                  underlayColor="#ccc"
-                  style={styles.button}
-                  onPress={handleSubmit}
-                >
-                  <Text style={styles.buttonText}>
-                    เปลี่ยนรหัสผ่าน
-                  </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                  underlayColor="#ccc"
-                  style={styles.button}
-                  onPress={cancel}
-                >
-                  <Text style={styles.buttonText}>
-                    ย้อนกลับ
-                  </Text>
-                </TouchableHighlight>
-              </View>
+                  {errors.confirmPassword}
+                </Text>
+              ) : null}
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableHighlight
+                underlayColor="#ccc"
+                style={styles.button}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.buttonText}>
+                  เปลี่ยนรหัสผ่าน
+                </Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                underlayColor="#ccc"
+                style={styles.button}
+                onPress={cancel}
+              >
+                <Text style={styles.buttonText}>
+                  ย้อนกลับ
+                </Text>
+              </TouchableHighlight>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+    // </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,

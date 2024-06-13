@@ -41,18 +41,6 @@ export default function Register({ navigation }) {
   const validateForm = () => {
     let errors = {};
 
-    if (!username)
-      errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
-    if (!name) errors.name = "กรุณากรอกชื่อ";
-    if (!lastname) errors.lastname = "กรุณากรอกนามสกุล";
-    if (!phone) errors.phone = "กรุณากรอกเบอร์โทรศัพท์";
-    if (!password) errors.password = "กรุณากรอกรหัสผ่าน";
-    if (!confirmPassword)
-      errors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
-
-    if (password !== confirmPassword)
-      errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
-
     if (
       !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
         username
@@ -69,6 +57,18 @@ export default function Register({ navigation }) {
       errors.password =
         "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
     }
+
+    if (!username)
+      errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
+    if (!name) errors.name = "กรุณากรอกชื่อ";
+    if (!lastname) errors.lastname = "กรุณากรอกนามสกุล";
+    if (!phone) errors.phone = "กรุณากรอกเบอร์โทรศัพท์";
+    if (!password) errors.password = "กรุณากรอกรหัสผ่าน";
+    if (!confirmPassword)
+      errors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
+
+    if (password !== confirmPassword)
+      errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
 
     setErrors(errors);
     return Object.keys(errors).length === 0;
@@ -196,189 +196,183 @@ export default function Register({ navigation }) {
     //   style={styles.imageBackground}
     //   imageStyle={{ opacity: 0.1 }}
     // >
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.container}
-      >
-        <ScrollView>
-          <Text style={styles.bigText}>สมัครสมาชิก</Text>
-          <View style={styles.inputBox}>
-            <View>
-              <Text style={styles.text}>
-                ชื่อผู้ใช้งาน :
-              </Text>
-              <View style={styles.form}>
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={styles.container}
+    >
+      <ScrollView>
+        <Text style={styles.bigText}>สมัครสมาชิก</Text>
+        <View style={styles.inputBox}>
+          <View>
+            <Text style={styles.text}>ชื่อผู้ใช้งาน :</Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.username ? styles.ifError : {},
+                ]}
+                placeholder="chompu"
+                value={username}
+                onChangeText={setUsername}
+              />
+              {errors.username ? (
+                <Text style={styles.errorText}>
+                  {errors.username}
+                </Text>
+              ) : null}
+            </View>
+            <Text style={styles.text}>ชื่อ : </Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.name ? styles.ifError : {},
+                ]}
+                placeholder="สุขกาย"
+                value={name}
+                onChangeText={setName}
+              />
+              {errors.name ? (
+                <Text style={styles.errorText}>
+                  {errors.name}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>นามสกุล : </Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.lastname ? styles.ifError : {},
+                ]}
+                placeholder="สบายใจ"
+                value={lastname}
+                onChangeText={setLastname}
+              />
+              {errors.lastname ? (
+                <Text style={styles.errorText}>
+                  {errors.lastname}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>เบอร์โทรศัพท์ :</Text>
+            <View style={styles.form}>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.phone ? styles.ifError : {},
+                ]}
+                placeholder="089123456"
+                value={phone}
+                onChangeText={filterNumber}
+                keyboardType="numeric"
+                maxLength={10}
+              />
+              {errors.phone ? (
+                <Text style={styles.errorText}>
+                  {errors.phone}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>รหัสผ่าน :</Text>
+            <View style={styles.form}>
+              <View
+                style={[
+                  styles.input,
+                  styles.passwordForm,
+                  errors.password ? styles.ifError : {},
+                ]}
+              >
                 <TextInput
-                  style={[
-                    styles.input,
-                    errors.username ? styles.ifError : {},
-                  ]}
-                  placeholder="chompu"
-                  value={username}
-                  onChangeText={setUsername}
+                  style={styles.passwordInput}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
                 />
-                {errors.username ? (
-                  <Text style={styles.errorText}>
-                    {errors.username}
-                  </Text>
-                ) : null}
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye" : "eye-off"}
+                  size={22}
+                  color="#aaa"
+                  style={styles.hiddenIcon}
+                  onPress={toggleShowPassword}
+                />
               </View>
-              <Text style={styles.text}>ชื่อ : </Text>
-              <View style={styles.form}>
+              {errors.password ? (
+                <Text style={styles.errorText}>
+                  {errors.password}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text style={styles.text}>
+              ยืนยันรหัสผ่าน :
+            </Text>
+
+            <View style={styles.form}>
+              <View
+                style={[
+                  styles.input,
+                  styles.passwordForm,
+                  { marginBottom: 0 },
+                  errors.confirmPassword
+                    ? styles.ifError
+                    : {},
+                ]}
+              >
                 <TextInput
-                  style={[
-                    styles.input,
-                    errors.name ? styles.ifError : {},
-                  ]}
-                  placeholder="สุขกาย"
-                  value={name}
-                  onChangeText={setName}
+                  style={styles.passwordInput}
+                  secureTextEntry={!showConfirmPassword}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
                 />
-                {errors.name ? (
-                  <Text style={styles.errorText}>
-                    {errors.name}
-                  </Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.text}>นามสกุล : </Text>
-              <View style={styles.form}>
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.lastname ? styles.ifError : {},
-                  ]}
-                  placeholder="สบายใจ"
-                  value={lastname}
-                  onChangeText={setLastname}
+                <MaterialCommunityIcons
+                  name={
+                    showConfirmPassword ? "eye" : "eye-off"
+                  }
+                  size={22}
+                  color="#aaa"
+                  style={styles.hiddenIcon}
+                  onPress={toggleShowConfirmPassword}
                 />
-                {errors.lastname ? (
-                  <Text style={styles.errorText}>
-                    {errors.lastname}
-                  </Text>
-                ) : null}
               </View>
-
-              <Text style={styles.text}>
-                เบอร์โทรศัพท์ :
-              </Text>
-              <View style={styles.form}>
-                <TextInput
+              {errors.confirmPassword ? (
+                <Text
                   style={[
-                    styles.input,
-                    errors.phone ? styles.ifError : {},
-                  ]}
-                  placeholder="089123456"
-                  value={phone}
-                  onChangeText={filterNumber}
-                  keyboardType="numeric"
-                  maxLength={10}
-                />
-                {errors.phone ? (
-                  <Text style={styles.errorText}>
-                    {errors.phone}
-                  </Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.text}>รหัสผ่าน :</Text>
-              <View style={styles.form}>
-                <View
-                  style={[
-                    styles.input,
-                    styles.passwordForm,
-                    errors.password ? styles.ifError : {},
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                  <MaterialCommunityIcons
-                    name={showPassword ? "eye" : "eye-off"}
-                    size={22}
-                    color="#aaa"
-                    style={styles.hiddenIcon}
-                    onPress={toggleShowPassword}
-                  />
-                </View>
-                {errors.password ? (
-                  <Text style={styles.errorText}>
-                    {errors.password}
-                  </Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.text}>
-                ยืนยันรหัสผ่าน :
-              </Text>
-
-              <View style={styles.form}>
-                <View
-                  style={[
-                    styles.input,
-                    styles.passwordForm,
+                    styles.errorText,
                     { marginBottom: 0 },
-                    errors.confirmPassword
-                      ? styles.ifError
-                      : {},
                   ]}
                 >
-                  <TextInput
-                    style={styles.passwordInput}
-                    secureTextEntry={!showConfirmPassword}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                  />
-                  <MaterialCommunityIcons
-                    name={
-                      showConfirmPassword
-                        ? "eye"
-                        : "eye-off"
-                    }
-                    size={22}
-                    color="#aaa"
-                    style={styles.hiddenIcon}
-                    onPress={toggleShowConfirmPassword}
-                  />
-                </View>
-                {errors.confirmPassword ? (
-                  <Text
-                    style={[
-                      styles.errorText,
-                      { marginBottom: 0 },
-                    ]}
-                  >
-                    {errors.confirmPassword}
-                  </Text>
-                ) : null}
-              </View>
-              <View style={styles.buttonContainer}>
-                <TouchableHighlight
-                  underlayColor="#ccc"
-                  style={styles.button}
-                  onPress={handleSubmit}
-                >
-                  <Text style={styles.buttonText}>
-                    สมัครสมาชิก
-                  </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                  underlayColor="#ccc"
-                  style={styles.button}
-                  onPress={cancel}
-                >
-                  <Text style={styles.buttonText}>
-                    ย้อนกลับ
-                  </Text>
-                </TouchableHighlight>
-              </View>
+                  {errors.confirmPassword}
+                </Text>
+              ) : null}
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableHighlight
+                underlayColor="#ccc"
+                style={styles.button}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.buttonText}>
+                  สมัครสมาชิก
+                </Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                underlayColor="#ccc"
+                style={styles.button}
+                onPress={cancel}
+              >
+                <Text style={styles.buttonText}>
+                  ย้อนกลับ
+                </Text>
+              </TouchableHighlight>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
     // </ImageBackground>
   );
 }
