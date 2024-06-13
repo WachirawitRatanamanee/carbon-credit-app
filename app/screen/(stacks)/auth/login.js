@@ -166,7 +166,7 @@ const LoginScreen = ({ navigation }) => {
               </Text>
             </TouchableHighlight>
           </View>
-          <View style={styles.register}>
+          {/* <View style={styles.register}>
             <TouchableHighlight
               underlayColor="#ccc"
               style={{
@@ -187,7 +187,7 @@ const LoginScreen = ({ navigation }) => {
                 ลืมรหัสผ่าน
               </Text>
             </TouchableHighlight>
-          </View>
+          </View> */}
         </View>
       </KeyboardAvoidingView>
     </ImageBackground>

@@ -50,14 +50,14 @@ export default function Stacks({ navigation }) {
               title: "สมัครสมาชิก",
             }}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             name="Forgot"
             component={Forgot}
             options={{
               headerShown: false,
               title: "ลืมรหัสผ่าน",
             }}
-          />
+          /> */}
         </Stack.Group>
         <Stack.Screen
           name="Tabs"
