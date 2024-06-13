@@ -27,7 +27,7 @@ import { LogBox } from 'react-native';
 LogBox.ignoreLogs(['Warning:']); // Ignore log notification by message
 
 export default function HomeScreen({ navigation }) {
-  const isAdmin = false;
+  const isAdmin = true;
   const [isExpand, setIsExpand] = useState(false);
 
   const data = {
