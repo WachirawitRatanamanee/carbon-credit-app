@@ -67,7 +67,6 @@ export default function Forgot({ navigation }) {
   };
 
   const handleError = (error) => {
-    console.log(error);
     switch (error) {
       case "auth/account-exists-with-different-credential":
       case "auth/email-already-in-use":

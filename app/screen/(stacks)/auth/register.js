@@ -150,7 +150,7 @@ export default function Register({ navigation }) {
       })
       .catch((error) => {
         err = handleError(error.code);
-        Alert.alert(`เกิดข้อผิดพลาด`, `${err}`, [
+        Alert.alert(``, `${err}`, [
           {
             text: `ตกลง`,
           },
@@ -190,12 +190,12 @@ export default function Register({ navigation }) {
   };
 
   return (
-    // <ImageBackground
-    //   source={require("../../../../assets/images/login-bg.jpg")}
-    //   resizeMode="cover"
-    //   style={styles.imageBackground}
-    //   imageStyle={{ opacity: 0.1 }}
-    // >
+    <ImageBackground
+      source={require("../../../../assets/images/login-bg.jpg")}
+      resizeMode="cover"
+      style={styles.imageBackground}
+      imageStyle={{ opacity: 0.4 }}
+    >
     <KeyboardAvoidingView
       behavior="padding"
       style={styles.container}
@@ -373,7 +373,7 @@ export default function Register({ navigation }) {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-    // </ImageBackground>
+    </ImageBackground>
   );
 }
 
