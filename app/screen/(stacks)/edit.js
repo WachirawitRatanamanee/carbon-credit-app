@@ -11,6 +11,14 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ref,
+  child,
+  push,
+  update,
+} from "firebase/database";
+import { auth, database } from "../../../firebase";
+import { updatePassword } from "firebase/auth";
 
 export default function Edit({ navigation, route }) {
   const userData = route.params.userData;
@@ -42,6 +50,15 @@ export default function Edit({ navigation, route }) {
 
   const validateForm = () => {
     let errors = {};
+
+    if (phone.length != 10) {
+      errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+    }
+
+    if (password.length < 6 && password.length > 0) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
 
     if (!name)
       errors.name = "กรุณากรอกชื่อที่ต้องการเปลี่ยน";
@@ -86,17 +103,77 @@ export default function Edit({ navigation, route }) {
     }
   };
 
+  const handleError = (error) => {
+    switch (error) {
+      case "auth/account-exists-with-different-credential":
+      case "auth/email-already-in-use":
+        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
+      case "auth/wrong-password":
+        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+      case "auth/user-not-found":
+        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
+      case "auth/user-disabled":
+        return "ผู้ใช้ถูกระงับ";
+      case "auth/too-many-requests":
+        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
+      case "auth/operation-not-allowed":
+        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
+      case "auth/invalid-email":
+        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
+      default:
+        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
+    }
+  };
+
+  const updateData = (name, lastname, phone) => {
+    const updatedData = {
+      ...userData,
+      name: name,
+      lastname: lastname,
+      phone: phone,
+    };
+    const updates = {};
+    console.log(defaultUsername);
+    updates["/users/" + defaultUsername] = updatedData;
+
+    return update(ref(database), updates);
+  };
+
+  const updateUserPassword = (password) => {
+    const user = auth.currentUser;
+    updatePassword(user, password);
+  };
+
   const sendData = () => {
-    Alert.alert(
-      `สำเร็จ`,
-      `ข้อมูลของคุณได้รับการเปลี่ยนแปลงแล้ว`,
-      [
+    try {
+      if (
+        name != defaultName ||
+        lastname != defaultLastname ||
+        phone != defaultPhone
+      ) {
+        updateData(name, lastname, phone);
+      }
+      if (password || confirmPassword) {
+        updateUserPassword(password);
+      }
+      Alert.alert(
+        `สำเร็จ`,
+        `ข้อมูลของคุณได้รับการเปลี่ยนแปลงแล้ว`,
+        [
+          {
+            text: `ตกลง`,
+          },
+        ]
+      );
+      navigation.goBack();
+    } catch (error) {
+      err = handleError(error.code);
+      Alert.alert(``, `${err}`, [
         {
           text: `ตกลง`,
         },
-      ]
-    );
-    navigation.goBack();
+      ]);
+    }
   };
 
   const cancel = () => {
@@ -123,6 +200,10 @@ export default function Edit({ navigation, route }) {
     } else {
       navigation.goBack();
     }
+  };
+
+  const filterNumber = (string) => {
+    setPhone(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -200,8 +281,9 @@ export default function Edit({ navigation, route }) {
                   ]}
                   placeholder="โปรดกรอกเบอร์โทรศัพท์ที่ต้องการเปลี่ยน"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={filterNumber}
                   keyboardType="numeric"
+                  maxLength={10}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
@@ -235,6 +317,11 @@ export default function Edit({ navigation, route }) {
                     onPress={toggleShowPassword}
                   />
                 </View>
+                {errors.password ? (
+                  <Text style={styles.errorText}>
+                    {errors.password}
+                  </Text>
+                ) : null}
               </View>
 
               <Text style={styles.text}>

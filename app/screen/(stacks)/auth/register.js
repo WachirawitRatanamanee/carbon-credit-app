@@ -132,6 +132,7 @@ export default function Register({ navigation }) {
                 phone: phone,
                 admin: false,
                 point: 0,
+                idCard: "1231234",
               }
             );
           }
