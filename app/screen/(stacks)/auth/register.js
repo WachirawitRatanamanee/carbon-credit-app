@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { auth, database } from "../../../../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, set } from "firebase/database";
 
 export default function Register({ navigation }) {
   const [username, setUsername] = useState("");
@@ -50,6 +53,23 @@ export default function Register({ navigation }) {
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
 
+    if (
+      !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
+        username
+      )
+    ) {
+      errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
+    }
+
+    if (phone.length != 10) {
+      errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+    }
+
+    if (password.length < 6) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -72,17 +92,70 @@ export default function Register({ navigation }) {
     }
   };
 
+  const handleError = (error) => {
+    switch (error) {
+      case "auth/account-exists-with-different-credential":
+      case "auth/email-already-in-use":
+        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
+      case "auth/wrong-password":
+        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+      case "auth/user-not-found":
+        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
+      case "auth/user-disabled":
+        return "ผู้ใช้ถูกระงับ";
+      case "auth/too-many-requests":
+        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
+      case "auth/operation-not-allowed":
+        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
+      case "auth/invalid-email":
+        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
+      default:
+        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
+    }
+  };
+
   const sendData = () => {
-    Alert.alert(
-      `สมัครสมาชิกสำเร็จ`,
-      `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
-      [
-        {
-          text: `ตกลง`,
-        },
-      ]
-    );
-    navigation.goBack();
+    createUserWithEmailAndPassword(
+      auth,
+      username + "@gmail.com",
+      password
+    )
+      .then(() => {
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            const save = set(
+              ref(database, "users/" + username),
+              {
+                username: username,
+                name: name,
+                lastname: lastname,
+                phone: phone,
+                admin: false,
+              }
+            );
+          }
+        });
+      })
+      .then(() => {
+        Alert.alert(
+          `สมัครสมาชิกสำเร็จ`,
+          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
+          [
+            {
+              text: `ตกลง`,
+            },
+          ]
+        );
+        navigation.goBack();
+      })
+      .catch((error) => {
+        err = handleError(error.code);
+        Alert.alert(`เกิดข้อผิดพลาด`, `${err}`, [
+          {
+            text: `ตกลง`,
+          },
+        ]);
+      });
   };
 
   const cancel = () => {
@@ -112,13 +185,17 @@ export default function Register({ navigation }) {
     }
   };
 
+  const filterNumber = (string) => {
+    setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
   return (
-    <ImageBackground
-      source={require("../../../../assets/images/login-bg.jpg")}
-      resizeMode="cover"
-      style={styles.imageBackground}
-      imageStyle={{ opacity: 0.1 }}
-    >
+    // <ImageBackground
+    //   source={require("../../../../assets/images/login-bg.jpg")}
+    //   resizeMode="cover"
+    //   style={styles.imageBackground}
+    //   imageStyle={{ opacity: 0.1 }}
+    // >
       <KeyboardAvoidingView
         behavior="padding"
         style={styles.container}
@@ -136,7 +213,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.username ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อผู้ใช้งาน"
+                  placeholder="chompu"
                   value={username}
                   onChangeText={setUsername}
                 />
@@ -153,7 +230,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.name ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อ"
+                  placeholder="สุขกาย"
                   value={name}
                   onChangeText={setName}
                 />
@@ -171,7 +248,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.lastname ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกนามสกุล"
+                  placeholder="สบายใจ"
                   value={lastname}
                   onChangeText={setLastname}
                 />
@@ -191,10 +268,11 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.phone ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์"
+                  placeholder="089123456"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={filterNumber}
                   keyboardType="numeric"
+                  maxLength={10}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
@@ -217,7 +295,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={showPassword ? "eye" : "eye-off"}
@@ -254,7 +331,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showConfirmPassword}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
-                    placeholder="โปรดยืนยันรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={
@@ -303,14 +379,14 @@ export default function Register({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    // </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
