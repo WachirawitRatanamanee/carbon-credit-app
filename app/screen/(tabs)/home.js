@@ -18,17 +18,40 @@ import {
   Row,
   Cell,
 } from "react-native-table-component";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Element,
   DetailElement,
 } from "../../../components/element";
-import { LogBox } from 'react-native';
-LogBox.ignoreLogs(['Warning:']); // Ignore log notification by message
+import { LogBox } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
+import { ref, onValue } from "firebase/database";
+import { database } from "../../../firebase";
+LogBox.ignoreLogs(["Warning:"]); // Ignore log notification by message
 
-export default function HomeScreen({ navigation }) {
-  const isAdmin = true;
+export default function HomeScreen({ navigation, route }) {
+  const userData = route.params.userData;
+  const isAdmin = userData.admin;
+  const userPoint = userData.point;
+  const username = userData.username;
   const [isExpand, setIsExpand] = useState(false);
+  const isFocused = useIsFocused();
+
+  function startListener() {
+    const listener = ref(database, "users/" + username);
+    onValue(listener, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        navigation.setParams({
+          userData: data,
+        });
+      }
+    });
+  }
+
+  useEffect(() => {
+    startListener();
+  }, [isFocused]);
 
   const data = {
     tableHead: ["ชื่อผู้ใช้งาน", `คะแนน`],
@@ -229,7 +252,7 @@ export default function HomeScreen({ navigation }) {
         ) : (
           <Point
             text={"คุณมี"}
-            score={"1234569"}
+            point={userPoint}
             icon={
               <AntDesign
                 name="pushpin"
@@ -337,7 +360,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alighItems: "center",
     justifyContent: "space-evenly",
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,

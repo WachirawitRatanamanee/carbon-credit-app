@@ -131,6 +131,7 @@ export default function Register({ navigation }) {
                 lastname: lastname,
                 phone: phone,
                 admin: false,
+                point: 0,
               }
             );
           }

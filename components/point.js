@@ -12,7 +12,7 @@ export default function Point({
   icon = null,
   color = "black",
   myStyle = {},
-  score = 0,
+  point = 0,
 }) {
   return (
     <Pressable style={styles.container} onPress={whenPress}>
@@ -35,7 +35,7 @@ export default function Point({
           <Text
             style={[styles.text, { color: color }, myStyle]}
           >
-            {score}
+            {point}
           </Text>
           <View style={styles.styleText}>
             <Text

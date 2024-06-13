@@ -10,8 +10,9 @@ import {
   Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { auth } from "../../../../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, database } from "../../../../firebase";
+import { ref, child, get } from "firebase/database";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -21,10 +22,31 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigation.replace("Tabs");
+        const username = user.email.replace(
+          "@gmail.com",
+          ""
+        );
+        let userData = {};
+        const dbRef = ref(database);
+        get(child(dbRef, `users/${username}`))
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              userData = snapshot.val();
+            } else {
+              Alert.alert("Something went wrong!");
+            }
+          })
+          .catch((error) => {
+            Alert.alert("Something went wrong!", error);
+          })
+          .then(() => {
+            navigation.replace("Tabs", {
+              username: username,
+              userData: userData,
+            });
+          });
       }
     });
-
     return unsubscribe;
   }, []);
 

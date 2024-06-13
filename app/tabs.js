@@ -6,12 +6,14 @@ import { AntDesign } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
-export default function Tabs() {
+export default function Tabs({ route }) {
+  const username = route.params.username;
+  const userData = route.params.userData;
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        // tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === "Home") {
@@ -39,11 +41,22 @@ export default function Tabs() {
         tabBarShowLabel: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        initialParams={{
+          username: username,
+          userData: userData,
+        }}
+      />
       {/* <Tab.Screen name="History" component={HistoryScreen}/> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
+        initialParams={{
+          username: username,
+          userData: userData,
+        }}
       />
     </Tab.Navigator>
   );

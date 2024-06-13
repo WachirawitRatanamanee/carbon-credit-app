@@ -13,10 +13,11 @@ import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Edit({ navigation, route }) {
-  const defaultUsername = route.params.username;
-  const defaultName = route.params.name;
-  const defaultLastname = route.params.lastname;
-  const defaultPhone = route.params.phone;
+  const userData = route.params.userData;
+  const defaultUsername = userData.username;
+  const defaultName = userData.name;
+  const defaultLastname = userData.lastname;
+  const defaultPhone = userData.phone;
 
   const [name, setName] = useState(defaultName);
   const [lastname, setLastname] = useState(defaultLastname);
@@ -310,7 +311,7 @@ export default function Edit({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
