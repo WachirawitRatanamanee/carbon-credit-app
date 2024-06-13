@@ -53,6 +53,23 @@ export default function Register({ navigation }) {
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
 
+    if (
+      !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
+        username
+      )
+    ) {
+      errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
+    }
+
+    if (phone.length != 10) {
+      errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+    }
+
+    if (password.length < 6) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -75,37 +92,70 @@ export default function Register({ navigation }) {
     }
   };
 
+  const handleError = (error) => {
+    switch (error) {
+      case "auth/account-exists-with-different-credential":
+      case "auth/email-already-in-use":
+        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
+      case "auth/wrong-password":
+        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+      case "auth/user-not-found":
+        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
+      case "auth/user-disabled":
+        return "ผู้ใช้ถูกระงับ";
+      case "auth/too-many-requests":
+        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
+      case "auth/operation-not-allowed":
+        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
+      case "auth/invalid-email":
+        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
+      default:
+        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
+    }
+  };
+
   const sendData = () => {
-    createUserWithEmailAndPassword(auth, username, password)
+    createUserWithEmailAndPassword(
+      auth,
+      username + "@gmail.com",
+      password
+    )
       .then(() => {
         auth.onAuthStateChanged((user) => {
           if (user) {
             const save = set(
-              ref(database, "users/" + user.uid),
+              ref(database, "users/" + username),
               {
                 username: username,
                 name: name,
                 lastname: lastname,
                 phone: phone,
+                admin: false,
               }
             );
           }
         });
       })
+      .then(() => {
+        Alert.alert(
+          `สมัครสมาชิกสำเร็จ`,
+          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
+          [
+            {
+              text: `ตกลง`,
+            },
+          ]
+        );
+        navigation.goBack();
+      })
       .catch((error) => {
-        alert(error.message);
+        err = handleError(error.code);
+        Alert.alert(`เกิดข้อผิดพลาด`, `${err}`, [
+          {
+            text: `ตกลง`,
+          },
+        ]);
       });
-
-    Alert.alert(
-      `สมัครสมาชิกสำเร็จ`,
-      `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
-      [
-        {
-          text: `ตกลง`,
-        },
-      ]
-    );
-    navigation.goBack();
   };
 
   const cancel = () => {
@@ -140,12 +190,12 @@ export default function Register({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../../assets/images/login-bg.jpg")}
-      resizeMode="cover"
-      style={styles.imageBackground}
-      imageStyle={{ opacity: 0.1 }}
-    >
+    // <ImageBackground
+    //   source={require("../../../../assets/images/login-bg.jpg")}
+    //   resizeMode="cover"
+    //   style={styles.imageBackground}
+    //   imageStyle={{ opacity: 0.1 }}
+    // >
       <KeyboardAvoidingView
         behavior="padding"
         style={styles.container}
@@ -154,17 +204,18 @@ export default function Register({ navigation }) {
           <Text style={styles.bigText}>สมัครสมาชิก</Text>
           <View style={styles.inputBox}>
             <View>
-              <Text style={styles.text}>Email :</Text>
+              <Text style={styles.text}>
+                ชื่อผู้ใช้งาน :
+              </Text>
               <View style={styles.form}>
                 <TextInput
                   style={[
                     styles.input,
                     errors.username ? styles.ifError : {},
                   ]}
-                  placeholder="myemail@example.com"
+                  placeholder="chompu"
                   value={username}
                   onChangeText={setUsername}
-                  keyboardType="email-address"
                 />
                 {errors.username ? (
                   <Text style={styles.errorText}>
@@ -217,10 +268,11 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.phone ? styles.ifError : {},
                   ]}
-                  placeholder="0890001234"
+                  placeholder="089123456"
                   value={phone}
                   onChangeText={filterNumber}
                   keyboardType="numeric"
+                  maxLength={10}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
@@ -327,14 +379,14 @@ export default function Register({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    // </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
