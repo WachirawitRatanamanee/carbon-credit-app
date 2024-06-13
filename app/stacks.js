@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screen/(stacks)/auth/login";
 import Tabs from "./tabs";
 import Edit from "./screen/(stacks)/edit";
-import { StyleSheet, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import TutotialPopup from "../components/popup/tutorial";
 import TypePopup from "../components/popup/type";
 import EditScorePopup from "../components/popup/edit-score";
@@ -100,10 +100,3 @@ export default function Stacks({ navigation }) {
     </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "green",
-    paddingHorizontal: 200,
-  },
-});

@@ -28,22 +28,18 @@ const LoginScreen = ({ navigation }) => {
         );
         let userData = {};
         const dbRef = ref(database);
-        get(child(dbRef, `users/${username}`))
+        get(child(dbRef, "/users/" + username))
           .then((snapshot) => {
             if (snapshot.exists()) {
               userData = snapshot.val();
-            } else {
-              Alert.alert("Something went wrong!");
+              navigation.replace("Tabs", {
+                username: username,
+                userData: userData,
+              });
             }
           })
           .catch((error) => {
             Alert.alert("Something went wrong!", error);
-          })
-          .then(() => {
-            navigation.replace("Tabs", {
-              username: username,
-              userData: userData,
-            });
           });
       }
     });
@@ -110,18 +106,14 @@ const LoginScreen = ({ navigation }) => {
         auth,
         username + "@gmail.com",
         password
-      )
-        .then((userCredential) => {
-          const user = userCredential.user;
-        })
-        .catch((error) => {
-          err = handleError(error.code);
-          Alert.alert(``, `${err}`, [
-            {
-              text: `ตกลง`,
-            },
-          ]);
-        });
+      ).catch((error) => {
+        err = handleError(error.code);
+        Alert.alert(``, `${err}`, [
+          {
+            text: `ตกลง`,
+          },
+        ]);
+      });
     }
   };
 

@@ -24,8 +24,7 @@ import {
   DetailElement,
 } from "../../../components/element";
 import { LogBox } from "react-native";
-import { useIsFocused } from "@react-navigation/native";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, off } from "firebase/database";
 import { database } from "../../../firebase";
 LogBox.ignoreLogs(["Warning:"]); // Ignore log notification by message
 
@@ -35,9 +34,8 @@ export default function HomeScreen({ navigation, route }) {
   const userPoint = userData.point;
   const username = userData.username;
   const [isExpand, setIsExpand] = useState(false);
-  const isFocused = useIsFocused();
 
-  function startListener() {
+  useEffect(() => {
     const listener = ref(database, "users/" + username);
     onValue(listener, (snapshot) => {
       if (snapshot.exists()) {
@@ -47,11 +45,8 @@ export default function HomeScreen({ navigation, route }) {
         });
       }
     });
-  }
-
-  useEffect(() => {
-    startListener();
-  }, [isFocused]);
+    return () => off(listener);
+  }, []);
 
   const data = {
     tableHead: ["ชื่อผู้ใช้งาน", `คะแนน`],
@@ -267,7 +262,7 @@ export default function HomeScreen({ navigation, route }) {
         <View></View>
         <View></View>
         <View style={styles.button}>
-          {isAdmin ? (
+          {/* {isAdmin ? (
             <ManageUserButton
               text={"ประเภทขยะ"}
               whenPress={navigateToTypePopup}
@@ -293,7 +288,7 @@ export default function HomeScreen({ navigation, route }) {
                 />
               }
             />
-          )}
+          )} */}
 
           {isAdmin ? (
             <View style={styles.admin}>

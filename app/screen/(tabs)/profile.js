@@ -12,8 +12,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { auth } from "../../../firebase";
 import { signOut } from "firebase/auth";
 import { useEffect } from "react";
-import { useIsFocused } from "@react-navigation/native";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, off } from "firebase/database";
 import { database } from "../../../firebase";
 
 export default function ProfileScreen({
@@ -25,9 +24,7 @@ export default function ProfileScreen({
   const lastname = userData.lastname;
   const username = userData.username;
 
-  const isFocused = useIsFocused();
-
-  function startListener() {
+  useEffect(() => {
     const listener = ref(database, "users/" + username);
     onValue(listener, (snapshot) => {
       if (snapshot.exists()) {
@@ -37,11 +34,8 @@ export default function ProfileScreen({
         });
       }
     });
-  }
-
-  useEffect(() => {
-    startListener();
-  }, [isFocused]);
+    return () => off(listener);
+  }, []);
 
   const navigateToEdit = (userData) => {
     navigation.navigate("Edit", {
