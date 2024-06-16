@@ -11,12 +11,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  ref,
-  child,
-  push,
-  update,
-} from "firebase/database";
+import { ref, update } from "firebase/database";
 import { auth, database } from "../../../firebase";
 import { updatePassword } from "firebase/auth";
 
@@ -103,28 +98,6 @@ export default function Edit({ navigation, route }) {
     }
   };
 
-  const handleError = (error) => {
-    switch (error) {
-      case "auth/account-exists-with-different-credential":
-      case "auth/email-already-in-use":
-        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
-      case "auth/wrong-password":
-        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
-      case "auth/user-not-found":
-        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
-      case "auth/user-disabled":
-        return "ผู้ใช้ถูกระงับ";
-      case "auth/too-many-requests":
-        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
-      case "auth/operation-not-allowed":
-        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
-      case "auth/invalid-email":
-        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
-      default:
-        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
-    }
-  };
-
   const updateData = (name, lastname, phone) => {
     const updatedData = {
       ...userData,
@@ -133,7 +106,6 @@ export default function Edit({ navigation, route }) {
       phone: phone,
     };
     const updates = {};
-    console.log(defaultUsername);
     updates["/users/" + defaultUsername] = updatedData;
 
     return update(ref(database), updates);
@@ -162,12 +134,12 @@ export default function Edit({ navigation, route }) {
         [
           {
             text: `ตกลง`,
+            onPress: () => navigation.goBack(),
           },
         ]
       );
-      navigation.goBack();
     } catch (error) {
-      err = handleError(error.code);
+      err = error.code;
       Alert.alert(``, `${err}`, [
         {
           text: `ตกลง`,

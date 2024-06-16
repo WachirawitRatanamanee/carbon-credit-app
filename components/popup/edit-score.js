@@ -3,20 +3,37 @@ import {
   View,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform,
   TextInput,
   TouchableHighlight,
   Alert,
 } from "react-native";
 import { useState } from "react";
+import { ref, update } from "firebase/database";
+import { database } from "../../firebase";
 
-export default function EditScorePopup({ route }) {
+export default function EditScorePopup({
+  navigation,
+  route,
+}) {
   const [username, setUsername] = useState("");
   const [score, setScore] = useState(0);
   const [errors, setErrors] = useState({});
+  const allUsers = route.params.allUsers;
+  const tableDataArr = Object.entries(allUsers);
+  const action = route.params.action;
+  const typeAction = route.params.typeAction;
+  let flagError = false;
+
+  let allUsername = [];
+  tableDataArr.map((value, index) => {
+    allUsername.push(value[0]);
+  });
 
   const validateForm = () => {
     let errors = {};
+
+    if (!allUsername.includes(username))
+      errors.username = "ไม่พบบัญชีผู้ใช้งานนี้";
 
     if (!username)
       errors.username = "กรุณากรอกบัญชีผู้ใช้งาน";
@@ -32,7 +49,7 @@ export default function EditScorePopup({ route }) {
     if (validateForm()) {
       Alert.alert(
         "โปรดยืนยัน",
-        `${route.params.action} ${username} ${
+        `${action} ${username} ${
           score ? `จำนวน ${score} คะแนน` : ""
         }?`,
         [
@@ -48,22 +65,95 @@ export default function EditScorePopup({ route }) {
     }
   };
 
+  const updateData = (user, typeAction) => {
+    let data = {};
+    flagError = false;
+    tableDataArr.map((value, index) => {
+      if (user == value[0]) {
+        data = value[1];
+      }
+    });
+    let point;
+    if (typeAction == "increase") {
+      point = parseInt(data.point) + parseInt(score);
+    }
+    if (typeAction == "decrease") {
+      point = parseInt(data.point) - parseInt(score);
+      if (point < 0) {
+        Alert.alert(
+          `ล้มเหลว`,
+          `คะแนนไม่สามารถต่ำกว่า 0 ได้`,
+          [
+            {
+              text: `ตกลง`,
+            },
+          ]
+        );
+        flagError = true;
+        return;
+      }
+    }
+
+    const updatedData = {
+      ...data,
+      point: point,
+    };
+    const updates = {};
+    updates["/users/" + data.username] = updatedData;
+    return update(ref(database), updates);
+  };
+
+  // const deleteUser = (user) => {
+  //   tableDataArr.map((value, index) => {
+  //     if (user == value[0]) {
+  //       data = value[1];
+  //     }
+  //   });
+  //   const updates = {};
+  //   updates["/users/" + data.username] = null;
+  //   return update(ref(database), updates);
+  // };
+
   const sendData = () => {
-    console.log("Submitted", username, score);
-    Alert.alert(
-      `สำเร็จ`,
-      `${route.params.action} ${username} ${
-        score ? `จำนวน ${score} คะแนน` : "สำเร็จ"
-      }`,
-      [
+    try {
+      if (
+        typeAction == "increase" ||
+        typeAction == "decrease"
+      ) {
+        updateData(username, typeAction);
+      }
+      // if (typeAction == "delete") {
+      //   deleteUser(username);
+      // }
+      if (!flagError) {
+        Alert.alert(
+          `สำเร็จ`,
+          `คุณได้${action} ${username} ${
+            score ? `จำนวน ${score} คะแนน` : "สำเร็จ"
+          }`,
+          [
+            {
+              text: `ตกลง`,
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      err = error.code;
+      Alert.alert(``, `${err}`, [
         {
           text: `ตกลง`,
         },
-      ]
-    );
-    setUsername("");
+      ]);
+    }
+
     setScore(0);
     setErrors({});
+  };
+
+  const filterNumber = (string) => {
+    setScore(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -97,7 +187,7 @@ export default function EditScorePopup({ route }) {
                 style={styles.input}
                 placeholder="โปรดกรอกจำนวนคะแนน"
                 value={score}
-                onChangeText={setScore}
+                onChangeText={filterNumber}
                 keyboardType="numeric"
               />
               {errors.score ? (

@@ -5,7 +5,6 @@ import {
   View,
   StyleSheet,
 } from "react-native";
-import { useState } from "react";
 
 module.exports = {
   DetailElement: function ({ detail }) {
@@ -15,21 +14,28 @@ module.exports = {
           {" "}
           ชื่อ:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.name}
+            {detail[0]}
           </Text>
         </Text>
         <Text style={styles.text}>
           {" "}
           นามสกุล:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.lastname}
+            {detail[1]}
           </Text>
         </Text>
         <Text style={styles.text}>
           {" "}
           เบอร์โทร:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.phone}
+            {detail[2]}
+          </Text>
+        </Text>
+        <Text style={styles.text}>
+          {" "}
+          เลขบัตรประชาชน:{" "}
+          <Text style={[styles.text, styles.data]}>
+            {detail[3]}
           </Text>
         </Text>
       </View>

@@ -23,6 +23,7 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
+  const [idCard, setIdCard] = useState(0);
 
   const [errors, setErrors] = useState({});
 
@@ -56,6 +57,10 @@ export default function Register({ navigation }) {
     if (password.length < 6) {
       errors.password =
         "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
+    if (idCard.length != 13) {
+      errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
     }
 
     if (!username)
@@ -132,7 +137,7 @@ export default function Register({ navigation }) {
                 phone: phone,
                 admin: false,
                 point: 0,
-                idCard: "1231234",
+                idCard: idCard,
               }
             );
           }
@@ -155,11 +160,12 @@ export default function Register({ navigation }) {
           phone: phone,
           admin: false,
           point: 0,
-          idCard: "1231234",
+          idCard: idCard,
         };
         navigation.replace("Tabs", {
           username: username,
           userData: userData,
+          allUsers: {},
         });
       })
       .catch((error) => {
@@ -201,6 +207,10 @@ export default function Register({ navigation }) {
 
   const filterNumber = (string) => {
     setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
+  const filterId = (string) => {
+    setIdCard(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -274,6 +284,26 @@ export default function Register({ navigation }) {
               </View>
 
               <Text style={styles.text}>
+                เลขบัตรประชาชน :{" "}
+              </Text>
+              <View style={styles.form}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.lastname ? styles.ifError : {},
+                  ]}
+                  value={idCard}
+                  onChangeText={filterId}
+                  maxLength={13}
+                />
+                {errors.idCard ? (
+                  <Text style={styles.errorText}>
+                    {errors.idCard}
+                  </Text>
+                ) : null}
+              </View>
+
+              <Text style={styles.text}>
                 เบอร์โทรศัพท์ :
               </Text>
               <View style={styles.form}>
@@ -282,7 +312,6 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.phone ? styles.ifError : {},
                   ]}
-                  placeholder="089123456"
                   value={phone}
                   onChangeText={filterNumber}
                   keyboardType="numeric"

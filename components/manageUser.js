@@ -4,6 +4,8 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { ref, update } from "firebase/database";
+import { database } from "../firebase";
 
 export default function ManageUserButton({
   text,

@@ -32,12 +32,29 @@ const LoginScreen = ({ navigation }) => {
           .then((snapshot) => {
             if (snapshot.exists()) {
               userData = snapshot.val();
+            }
+            if (userData.admin) {
+              get(child(dbRef, "/users/")).then(
+                (newSnapshot) => {
+                  if (newSnapshot.exists()) {
+                    const allUsers = newSnapshot.val();
+                    navigation.replace("Tabs", {
+                      username: username,
+                      userData: userData,
+                      allUsers: allUsers,
+                    });
+                  }
+                }
+              );
+            } else {
               navigation.replace("Tabs", {
                 username: username,
                 userData: userData,
+                allUsers: {},
               });
             }
           })
+
           .catch((error) => {
             Alert.alert("Something went wrong!", error);
           });

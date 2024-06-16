@@ -33,7 +33,27 @@ export default function HomeScreen({ navigation, route }) {
   const isAdmin = userData.admin;
   const userPoint = userData.point;
   const username = userData.username;
+  const allUsers = route.params.allUsers;
   const [isExpand, setIsExpand] = useState(false);
+  const tableDataArr = Object.entries(allUsers);
+
+  let tableData = [];
+  let detailData = [];
+  tableDataArr.map((value, index) => {
+    tableData.push([
+      value[1].username,
+      parseInt(value[1].point),
+      2,
+      3,
+      4,
+    ]);
+    detailData.push([
+      value[1].name,
+      value[1].lastname,
+      value[1].phone,
+      value[1].idCard,
+    ]);
+  });
 
   useEffect(() => {
     const listener = ref(database, "users/" + username);
@@ -45,55 +65,65 @@ export default function HomeScreen({ navigation, route }) {
         });
       }
     });
-    return () => off(listener);
+    const listenerAdmin = ref(database, "users/");
+    if (isAdmin) {
+      onValue(listenerAdmin, (snapshot) => {
+        if (snapshot.exists()) {
+          const allUsers = snapshot.val();
+          navigation.setParams({
+            allUsers: allUsers,
+          });
+        }
+      });
+    }
+    return () => {
+      off(listener);
+      off(listenerAdmin);
+    };
   }, []);
 
   const data = {
-    tableHead: ["ชื่อผู้ใช้งาน", `คะแนน`],
-    tableData: [
-      ["jiw", 6],
-      ["baby", 8],
-      ["testing", 10],
-    ],
-    detailData: [
-      {
-        name: "wachi",
-        lastname: "rata",
-        phone: "0385",
-      },
-      {
-        name: "saaaasing",
-        lastname: "eiei",
-        phone: "6133",
-      },
-      {
-        name: "ttasdasdastt",
-        lastname: "ttt",
-        phone: "9999",
-      },
+    tableHead: [
+      "ผู้ใช้งาน",
+      `คะแนน1`,
+      `คะแนน2`,
+      `คะแนน3`,
+      `คะแนน4`,
     ],
   };
 
-  const calculateTotalScore = () => {
+  const calculateTotalScore = (score) => {
     let totalScore = 0;
-    data.tableData.map((value, index) => {
-      totalScore += value[1];
+    tableData.map((value, index) => {
+      totalScore += value[score];
     });
     return totalScore + " คะแนน";
   };
 
   const totalScoreTable = {
-    tableHead: ["คะแนนทั้งหมด", calculateTotalScore()],
+    tableHead: [
+      "คะแนนทั้งหมด",
+      calculateTotalScore(1),
+      calculateTotalScore(2),
+      calculateTotalScore(3),
+      calculateTotalScore(4),
+    ],
   };
 
-  const navigateToTypePopup = () => {
-    navigation.navigate("TypePopup");
-  };
+  // const navigateToTypePopup = () => {
+  //   navigation.navigate("TypePopup");
+  // };
 
-  const navigateToEditScorePopup = (action, text) => {
+  const navigateToEditScorePopup = (
+    action,
+    typeAction,
+    text
+  ) => {
     navigation.navigate("EditScorePopup", {
       action: action,
       text: text,
+      allUsers: allUsers,
+      typeAction: typeAction,
     });
   };
 
@@ -102,7 +132,7 @@ export default function HomeScreen({ navigation, route }) {
       <Cell
         key={index}
         data={
-          index === 1 ? (
+          index === 4 ? (
             <Element
               data={tableHead}
               isExpand={isExpand}
@@ -126,7 +156,6 @@ export default function HomeScreen({ navigation, route }) {
         style={styles.imageBackground}
         imageStyle={{ opacity: 0.3 }}
       >
-        <View></View>
         {isAdmin ? (
           <View style={{ marginTop: "5%" }}></View>
         ) : null}
@@ -180,7 +209,7 @@ export default function HomeScreen({ navigation, route }) {
                   borderColor: "gray",
                 }}
               >
-                {data.tableData.map((rowData, index) => (
+                {tableData.map((rowData, index) => (
                   <TableWrapper>
                     <TableWrapper
                       key={index}
@@ -209,7 +238,7 @@ export default function HomeScreen({ navigation, route }) {
                       <Cell
                         data={
                           <DetailElement
-                            detail={data.detailData[index]}
+                            detail={detailData[index]}
                           />
                         }
                         style={[
@@ -258,9 +287,10 @@ export default function HomeScreen({ navigation, route }) {
             color="#023020"
           />
         )}
-        <View></View>
-        <View></View>
-        <View></View>
+        {isAdmin ? null : <View></View>}
+        {isAdmin ? null : <View></View>}
+        {isAdmin ? null : <View></View>}
+
         <View style={styles.button}>
           {/* {isAdmin ? (
             <ManageUserButton
@@ -289,7 +319,6 @@ export default function HomeScreen({ navigation, route }) {
               }
             />
           )} */}
-
           {isAdmin ? (
             <View style={styles.admin}>
               <ManageUserButton
@@ -297,6 +326,7 @@ export default function HomeScreen({ navigation, route }) {
                 whenPress={() =>
                   navigateToEditScorePopup(
                     "เพิ่มคะแนนผู้ใช้งาน",
+                    "increase",
                     "เพิ่มคะแนน"
                   )
                 }
@@ -308,12 +338,14 @@ export default function HomeScreen({ navigation, route }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
+                userData={userData}
               />
               <ManageUserButton
                 text={"ลดคะแนน"}
                 whenPress={() =>
                   navigateToEditScorePopup(
                     "ลดคะแนนผู้ใช้งาน",
+                    "decrease",
                     "ลดคะแนน"
                   )
                 }
@@ -325,12 +357,14 @@ export default function HomeScreen({ navigation, route }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
+                userData={userData}
               />
-              <ManageUserButton
+              {/* <ManageUserButton
                 text={"ลบบัญชี"}
                 whenPress={() =>
                   navigateToEditScorePopup(
-                    "ลบบัญชีผู้ใช้งาน"
+                    "ลบบัญชีผู้ใช้งาน",
+                    "delete",
                   )
                 }
                 icon={
@@ -341,7 +375,8 @@ export default function HomeScreen({ navigation, route }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
-              />
+                userData={userData}
+              /> */}
             </View>
           ) : null}
         </View>
