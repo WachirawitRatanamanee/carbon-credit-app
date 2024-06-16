@@ -8,12 +8,15 @@ import {
   Alert,
   ScrollView,
   ImageBackground,
+  Image,
+  Dimensions,
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { auth, database } from "../../../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, set } from "firebase/database";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Register({ navigation }) {
   const [username, setUsername] = useState("");
@@ -24,19 +27,28 @@ export default function Register({ navigation }) {
   const [confirmPassword, setConfirmPassword] =
     useState("");
   const [idCard, setIdCard] = useState(0);
-
   const [errors, setErrors] = useState({});
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
+  const [image, setImage] = useState(null);
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
-
   const toggleShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
   };
 
   const validateForm = () => {
@@ -63,6 +75,8 @@ export default function Register({ navigation }) {
       errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
     }
 
+    if (!image) errors.imageCard = "กรุณาเลือกรูปภาพบัตรประชาชน";
+
     if (!username)
       errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
     if (!name) errors.name = "กรุณากรอกชื่อ";
@@ -71,6 +85,7 @@ export default function Register({ navigation }) {
     if (!password) errors.password = "กรุณากรอกรหัสผ่าน";
     if (!confirmPassword)
       errors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
+    if (!idCard) errors.idCard = "กรุณากรอกเลขบัตรประชาชน";
 
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
@@ -284,24 +299,78 @@ export default function Register({ navigation }) {
               </View>
 
               <Text style={styles.text}>
-                เลขบัตรประชาชน :{" "}
+                เลขบัตรประชาชน :
               </Text>
+
               <View style={styles.form}>
-                <TextInput
+                <View
                   style={[
                     styles.input,
-                    errors.lastname ? styles.ifError : {},
+                    styles.passwordForm,
+                    errors.idCard ? styles.ifError : {},
                   ]}
-                  value={idCard}
-                  onChangeText={filterId}
-                  maxLength={13}
-                />
+                >
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={idCard}
+                    onChangeText={filterId}
+                    keyboardType="numeric"
+                    maxLength={13}
+                  />
+                  <MaterialCommunityIcons
+                    name="image"
+                    size={26}
+                    color="gray"
+                    onPress={pickImage}
+                    style={styles.hiddenIcon}
+                  />
+                </View>
                 {errors.idCard ? (
                   <Text style={styles.errorText}>
                     {errors.idCard}
                   </Text>
                 ) : null}
               </View>
+              {image ? (
+                <View style={styles.image}>
+                  <Image
+                    source={{ uri: image }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: 10,
+                    }}
+                  />
+                  <TouchableHighlight
+                    underlayColor={false}
+                    activeOpacity={0.6}
+                    style={{
+                      borderRadius: 5,
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                    }}
+                    onPress={() => setImage(null)}
+                  >
+                    <Text
+                      style={{
+                        color: "darkred",
+                        padding: 10,
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        textAlign: "center",
+                      }}
+                    >
+                      X
+                    </Text>
+                  </TouchableHighlight>
+                </View>
+              ) : null}
+              {errors.imageCard ? (
+                  <Text style={styles.errorText}>
+                    {errors.imageCard}
+                  </Text>
+                ) : null}
 
               <Text style={styles.text}>
                 เบอร์โทรศัพท์ :
@@ -494,5 +563,15 @@ const styles = StyleSheet.create({
   },
   ifError: {
     marginBottom: 5,
+  },
+  image: {
+    width: Dimensions.get("window").width * 0.7,
+    height: Dimensions.get("window").width * 0.7,
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: "darkgreen",
+    borderRadius: 10,
+    marginTop: 5,
+    marginBottom: 10,
   },
 });

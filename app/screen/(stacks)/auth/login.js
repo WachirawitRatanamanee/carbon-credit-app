@@ -235,7 +235,7 @@ const LoginScreen = ({ navigation }) => {
           </TouchableHighlight>
           <View style={styles.register}>
             <Text style={styles.label}>
-              ยังไม่มีบัญชี?{" "}
+              ยังไม่มีบัญชี?
             </Text>
             <TouchableHighlight
               underlayColor="#ccc"

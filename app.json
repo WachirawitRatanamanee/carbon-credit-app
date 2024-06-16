@@ -28,10 +28,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-image-picker",
-        {
-          "photosPermission": "แอปนี้ต้องการเข้าถึงรูปภาพของคุณเพื่อให้คุณเพื่อยืนยันตัวตน"
-        }
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": true

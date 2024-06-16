@@ -21,10 +21,13 @@ export default function Edit({ navigation, route }) {
   const defaultName = userData.name;
   const defaultLastname = userData.lastname;
   const defaultPhone = userData.phone;
+  const defaultIdCard = userData.idCard;
 
   const [name, setName] = useState(defaultName);
   const [lastname, setLastname] = useState(defaultLastname);
   const [phone, setPhone] = useState(defaultPhone);
+  const [idCard, setIdCard] = useState(defaultIdCard);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
@@ -55,6 +58,10 @@ export default function Edit({ navigation, route }) {
         "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
     }
 
+    if (idCard.length != 13 && idCard.length > 0) {
+      errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
+    }
+
     if (!name)
       errors.name = "กรุณากรอกชื่อที่ต้องการเปลี่ยน";
     if (!lastname)
@@ -62,6 +69,7 @@ export default function Edit({ navigation, route }) {
     if (!phone)
       errors.phone =
         "กรุณากรอกเบอร์โทรศัพท์ที่ต้องการเปลี่ยน";
+    if (!idCard) errors.idCard = "กรุณากรอกเลขบัตรประชาชน";
 
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
@@ -76,8 +84,8 @@ export default function Edit({ navigation, route }) {
         name != defaultName ||
         lastname != defaultLastname ||
         phone != defaultPhone ||
-        password ||
-        confirmPassword
+        idCard != defaultIdCard ||
+        (password && confirmPassword)
       ) {
         Alert.alert(
           "โปรดยืนยัน",
@@ -98,12 +106,13 @@ export default function Edit({ navigation, route }) {
     }
   };
 
-  const updateData = (name, lastname, phone) => {
+  const updateData = (name, lastname, phone, idCard) => {
     const updatedData = {
       ...userData,
       name: name,
       lastname: lastname,
       phone: phone,
+      idCard: idCard,
     };
     const updates = {};
     updates["/users/" + defaultUsername] = updatedData;
@@ -121,11 +130,12 @@ export default function Edit({ navigation, route }) {
       if (
         name != defaultName ||
         lastname != defaultLastname ||
-        phone != defaultPhone
+        phone != defaultPhone ||
+        idCard != defaultIdCard
       ) {
-        updateData(name, lastname, phone);
+        updateData(name, lastname, phone, idCard);
       }
-      if (password || confirmPassword) {
+      if (password && confirmPassword) {
         updateUserPassword(password);
       }
       Alert.alert(
@@ -153,6 +163,7 @@ export default function Edit({ navigation, route }) {
       name != defaultName ||
       lastname != defaultLastname ||
       phone != defaultPhone ||
+      idCard != defaultIdCard ||
       password ||
       confirmPassword
     ) {
@@ -176,6 +187,10 @@ export default function Edit({ navigation, route }) {
 
   const filterNumber = (string) => {
     setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
+  const filterId = (string) => {
+    setIdCard(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -238,6 +253,33 @@ export default function Edit({ navigation, route }) {
                 {errors.lastname ? (
                   <Text style={styles.errorText}>
                     {errors.lastname}
+                  </Text>
+                ) : null}
+              </View>
+
+              <Text style={styles.text}>
+                เลขบัตรประชาชน :
+              </Text>
+
+              <View style={styles.form}>
+                <View
+                  style={[
+                    styles.input,
+                    styles.passwordForm,
+                    errors.idCard ? styles.ifError : {},
+                  ]}
+                >
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={idCard}
+                    onChangeText={filterId}
+                    keyboardType="numeric"
+                    maxLength={13}
+                  />
+                </View>
+                {errors.idCard ? (
+                  <Text style={styles.errorText}>
+                    {errors.idCard}
                   </Text>
                 ) : null}
               </View>
