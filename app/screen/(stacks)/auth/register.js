@@ -55,7 +55,8 @@ export default function Register({ navigation }) {
     let errors = {};
 
     if (username.length < 2) {
-      errors.username = "ชื่อผู้ใช้งานต้องมีอย่างน้อย 2 ตัวอักษร";
+      errors.username =
+        "ชื่อผู้ใช้งานต้องมีอย่างน้อย 2 ตัวอักษร";
     }
 
     if (
@@ -149,19 +150,17 @@ export default function Register({ navigation }) {
         auth.onAuthStateChanged((user) => {
           if (user) {
             const save = set(
-              ref(database, "users/" + username),
-              {
-                username: username,
-                name: name,
-                lastname: lastname,
-                phone: phone,
-                admin: false,
-                foodWaste: 0,
-                organicWaste: 0,
-                plasticWaste: 0,
-                idCard: idCard,
-              }
-            );
+            set(ref(database, "users/" + username), {
+              username: username,
+              name: name,
+              lastname: lastname,
+              phone: phone,
+              admin: false,
+              foodWaste: 0,
+              organicWaste: 0,
+              plasticWaste: 0,
+              idCard: idCard,
+            });
           }
         });
       })
@@ -217,7 +216,7 @@ export default function Register({ navigation }) {
         [
           {
             text: `ยืนยัน`,
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.replace("Login"),
           },
           {
             text: "ยกเลิก",
@@ -225,7 +224,7 @@ export default function Register({ navigation }) {
         ]
       );
     } else {
-      navigation.goBack();
+      navigation.replace("Login");
     }
   };
 

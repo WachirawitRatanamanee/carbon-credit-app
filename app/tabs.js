@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screen/(tabs)/home";
 import ProfileScreen from "./screen/(tabs)/profile";
-import HistoryScreen from "./screen/(tabs)/history";
+// import HistoryScreen from "./screen/(tabs)/history";
 import { AntDesign } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();

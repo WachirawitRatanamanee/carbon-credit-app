@@ -17,11 +17,11 @@ import { updatePassword } from "firebase/auth";
 
 export default function Edit({ navigation, route }) {
   const userData = route.params.userData;
-  const defaultUsername = userData.username;
-  const defaultName = userData.name;
-  const defaultLastname = userData.lastname;
-  const defaultPhone = userData.phone;
-  const defaultIdCard = userData.idCard;
+  const defaultUsername = userData.username? userData.username : "";
+  const defaultName = userData.name? userData.name : "";
+  const defaultLastname = userData.lastname? userData.lastname : "";
+  const defaultPhone = userData.phone? userData.phone : "";
+  const defaultIdCard = userData.idCard? userData.idCard : "";
 
   const [name, setName] = useState(defaultName);
   const [lastname, setLastname] = useState(defaultLastname);
@@ -228,7 +228,7 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อที่ต้องการเปลี่ยน"
+                  placeholder="กรอกชื่อที่ต้องการ"
                   value={name}
                   onChangeText={setName}
                 />
@@ -246,7 +246,7 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกนามสกุลที่ต้องการเปลี่ยน"
+                  placeholder="กรอกนามสกุลที่ต้องการ"
                   value={lastname}
                   onChangeText={setLastname}
                 />
@@ -271,6 +271,7 @@ export default function Edit({ navigation, route }) {
                 >
                   <TextInput
                     style={styles.passwordInput}
+                    placeholder="กรอกเลขบัตรที่ต้องการ"
                     value={idCard}
                     onChangeText={filterId}
                     keyboardType="numeric"
@@ -293,7 +294,7 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์ที่ต้องการเปลี่ยน"
+                  placeholder="กรอกเบอร์โทรศัพท์ที่ต้องการ"
                   value={phone}
                   onChangeText={filterNumber}
                   keyboardType="numeric"
@@ -321,7 +322,7 @@ export default function Edit({ navigation, route }) {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่านที่ต้องการ"
+                    placeholder="กรอกรหัสผ่านที่ต้องการ"
                   />
                   <MaterialCommunityIcons
                     name={showPassword ? "eye" : "eye-off"}

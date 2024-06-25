@@ -135,11 +135,11 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleRegister = () => {
-    navigation.navigate("Register");
+    navigation.replace("Register");
   };
 
   const handleForgot = () => {
-    navigation.navigate("Forgot");
+    navigation.replace("Forgot");
   };
 
   return (

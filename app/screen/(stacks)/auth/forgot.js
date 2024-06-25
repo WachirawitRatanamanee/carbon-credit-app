@@ -118,7 +118,7 @@ export default function Forgot({ navigation }) {
             },
           ]
         );
-        // navigation.goBack();
+        // navigation.replace("Login");
       })
       .catch((error) => {
         err = handleError(error.code);
@@ -138,7 +138,7 @@ export default function Forgot({ navigation }) {
         [
           {
             text: `ยืนยัน`,
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.replace("Login"),
           },
           {
             text: "ยกเลิก",
@@ -146,7 +146,7 @@ export default function Forgot({ navigation }) {
         ]
       );
     } else {
-      navigation.goBack();
+      navigation.replace("Login");
     }
   };
 
