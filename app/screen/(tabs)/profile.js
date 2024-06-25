@@ -100,9 +100,9 @@ export default function ProfileScreen({
               />
             }
             next={true}
-            containerStyle={{ borderBottomWidth: 0 }}
+            // containerStyle={{ borderBottomWidth: 0 }}
           />
-          <PressButton
+          {/* <PressButton
             text={"วิธีใช้งานแอพพลิเคชั่น"}
             whenPress={navigateToTutorialPopup}
             icon={
@@ -113,7 +113,7 @@ export default function ProfileScreen({
               />
             }
             next={true}
-          />
+          /> */}
           <PressButton
             text={"ออกจากระบบ"}
             whenPress={logout}

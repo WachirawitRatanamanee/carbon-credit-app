@@ -42,17 +42,18 @@ export default function HomeScreen({ navigation, route }) {
   let tableData = [];
   let detailData = [];
   tableDataArr.map((value, index) => {
+    let allUsersData = value[1];
     tableData.push([
-      value[1].username,
-      parseInt(value[1].foodWaste),
-      parseInt(value[1].organicWaste),
-      parseInt(value[1].plasticWaste),
+      allUsersData.username,
+      parseInt(allUsersData.foodWaste),
+      parseInt(allUsersData.organicWaste),
+      parseInt(allUsersData.plasticWaste),
     ]);
     detailData.push([
-      value[1].name,
-      value[1].lastname,
-      value[1].phone,
-      value[1].idCard,
+      allUsersData.name,
+      allUsersData.lastname,
+      allUsersData.phone,
+      allUsersData.idCard,
     ]);
   });
 
@@ -279,8 +280,9 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         ) : (
           <View>
+          <View style={{flexDirection:"row", justifyContent:"center"}}>
             <Point
-              text={"คุณมี"}
+              text={"คะแนนเศษอาหาร"}
               point={userPointFoodWaste}
               icon={
                 <AntDesign
@@ -292,7 +294,7 @@ export default function HomeScreen({ navigation, route }) {
               color="#023020"
             />
             <Point
-              text={"คุณมี"}
+              text={"คะแนนขยะอินทรีย์"}
               point={userPointOrganicWaste}
               icon={
                 <AntDesign
@@ -303,8 +305,9 @@ export default function HomeScreen({ navigation, route }) {
               }
               color="#023020"
             />
+            </View>
             <Point
-              text={"คุณมี"}
+              text={"คะแนนขยะพลาสติก"}
               point={userPointPlasticWaste}
               icon={
                 <AntDesign
@@ -317,8 +320,6 @@ export default function HomeScreen({ navigation, route }) {
             />
           </View>
         )}
-        {isAdmin ? null : <View></View>}
-        {isAdmin ? null : <View></View>}
         {isAdmin ? null : <View></View>}
 
         <View style={styles.button}>
