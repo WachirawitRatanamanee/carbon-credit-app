@@ -57,15 +57,15 @@ module.exports = {
       >
         <Text style={myStyle}>{data}</Text>
         <View style={{ position: "relative" }}>
-          <View
-            style={{
-              position: "absolute",
-              right: 12,
-              top: -8,
-            }}
-          >
-            <Pressable
-              onPress={() => setIsExpand(!isExpand)}
+          <Pressable onPress={() => setIsExpand(!isExpand)}>
+            <View
+              style={{
+                position: "absolute",
+                right: -5,
+                bottom: 0,
+                padding: 10,
+                borderRadius:5
+              }}
             >
               <View>
                 {isExpand ? (
@@ -82,8 +82,8 @@ module.exports = {
                   />
                 )}
               </View>
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
         </View>
       </View>
     );
@@ -92,12 +92,13 @@ module.exports = {
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 15,
+    fontSize: 14,
     padding: 5,
     color: "#333",
   },
   data: {
     fontWeight: "bold",
     color: "black",
+    fontSize: 15,
   },
 });

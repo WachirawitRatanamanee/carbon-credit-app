@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import ManageUserButton from "../../../components/manageUser";
 import Point from "../../../components/point";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import {
@@ -31,7 +31,9 @@ LogBox.ignoreLogs(["Warning:"]); // Ignore log notification by message
 export default function HomeScreen({ navigation, route }) {
   const userData = route.params.userData;
   const isAdmin = userData.admin;
-  const userPoint = userData.point;
+  const userPointFoodWaste = userData.foodWaste;
+  const userPointOrganicWaste = userData.organicWaste;
+  const userPointPlasticWaste = userData.plasticWaste;
   const username = userData.username;
   const allUsers = route.params.allUsers;
   const [isExpand, setIsExpand] = useState(false);
@@ -42,10 +44,9 @@ export default function HomeScreen({ navigation, route }) {
   tableDataArr.map((value, index) => {
     tableData.push([
       value[1].username,
-      parseInt(value[1].point),
-      2,
-      3,
-      4,
+      parseInt(value[1].foodWaste),
+      parseInt(value[1].organicWaste),
+      parseInt(value[1].plasticWaste),
     ]);
     detailData.push([
       value[1].name,
@@ -85,30 +86,26 @@ export default function HomeScreen({ navigation, route }) {
   const data = {
     tableHead: [
       "ผู้ใช้งาน",
-      `คะแนน1`,
-      `คะแนน2`,
-      `คะแนน3`,
-      `คะแนน4`,
+      `เศษอาหาร`,
+      `ขยะอินทรีย์`,
+      `ขยะพลาสติก`,
     ],
   };
 
-  const calculateTotalScore = (score) => {
+  const calculateTotalScore = (scoreIndex) => {
     let totalScore = 0;
     tableData.map((value, index) => {
-      totalScore += value[score];
+      totalScore += value[scoreIndex];
     });
-    return totalScore + " คะแนน";
+    return totalScore;
   };
 
-  const totalScoreTable = {
-    tableHead: [
-      "คะแนนทั้งหมด",
-      calculateTotalScore(1),
-      calculateTotalScore(2),
-      calculateTotalScore(3),
-      calculateTotalScore(4),
-    ],
-  };
+  const totalScoreTable = [
+    "คะแนนทั้งหมด",
+    calculateTotalScore(1),
+    calculateTotalScore(2),
+    calculateTotalScore(3),
+  ];
 
   // const navigateToTypePopup = () => {
   //   navigation.navigate("TypePopup");
@@ -132,7 +129,7 @@ export default function HomeScreen({ navigation, route }) {
       <Cell
         key={index}
         data={
-          index === 4 ? (
+          index === data.tableHead.length - 1 ? (
             <Element
               data={tableHead}
               isExpand={isExpand}
@@ -228,7 +225,14 @@ export default function HomeScreen({ navigation, route }) {
                           <Cell
                             key={cellIndex}
                             data={cellData}
-                            textStyle={styles.tableTextData}
+                            textStyle={[
+                              styles.tableTextData,
+                              cellIndex == 0
+                                ? { fontWeight: "bold" }
+                                : {
+                                    fontWeight: "normal",
+                                  },
+                            ]}
                           />
                         )
                       )}
@@ -264,7 +268,7 @@ export default function HomeScreen({ navigation, route }) {
               }}
             >
               <Row
-                data={totalScoreTable.tableHead}
+                data={totalScoreTable}
                 style={styles.tableHead}
                 textStyle={[
                   styles.tableTextHead,
@@ -274,18 +278,44 @@ export default function HomeScreen({ navigation, route }) {
             </Table>
           </View>
         ) : (
-          <Point
-            text={"คุณมี"}
-            point={userPoint}
-            icon={
-              <AntDesign
-                name="pushpin"
-                size={32}
-                color="green"
-              />
-            }
-            color="#023020"
-          />
+          <View>
+            <Point
+              text={"คุณมี"}
+              point={userPointFoodWaste}
+              icon={
+                <AntDesign
+                  name="pushpin"
+                  size={32}
+                  color="green"
+                />
+              }
+              color="#023020"
+            />
+            <Point
+              text={"คุณมี"}
+              point={userPointOrganicWaste}
+              icon={
+                <AntDesign
+                  name="pushpin"
+                  size={32}
+                  color="green"
+                />
+              }
+              color="#023020"
+            />
+            <Point
+              text={"คุณมี"}
+              point={userPointPlasticWaste}
+              icon={
+                <AntDesign
+                  name="pushpin"
+                  size={32}
+                  color="green"
+                />
+              }
+              color="#023020"
+            />
+          </View>
         )}
         {isAdmin ? null : <View></View>}
         {isAdmin ? null : <View></View>}
@@ -420,13 +450,11 @@ const styles = StyleSheet.create({
     margin: 12,
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 18,
-    flex: 1,
-    textAlignVertical: "center",
+    fontSize: 15,
   },
   tableTextData: {
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     flex: 1,
     textAlignVertical: "center",
     padding: 5,

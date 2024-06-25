@@ -54,6 +54,10 @@ export default function Register({ navigation }) {
   const validateForm = () => {
     let errors = {};
 
+    if (username.length < 2) {
+      errors.username = "ชื่อผู้ใช้งานต้องมีอย่างน้อย 2 ตัวอักษร";
+    }
+
     if (
       !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
         username
@@ -75,7 +79,8 @@ export default function Register({ navigation }) {
       errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
     }
 
-    if (!image) errors.imageCard = "กรุณาเลือกรูปภาพบัตรประชาชน";
+    if (!image)
+      errors.imageCard = "กรุณาเลือกรูปภาพบัตรประชาชน";
 
     if (!username)
       errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
@@ -151,7 +156,9 @@ export default function Register({ navigation }) {
                 lastname: lastname,
                 phone: phone,
                 admin: false,
-                point: 0,
+                foodWaste: 0,
+                organicWaste: 0,
+                plasticWaste: 0,
                 idCard: idCard,
               }
             );
@@ -174,7 +181,9 @@ export default function Register({ navigation }) {
           lastname: lastname,
           phone: phone,
           admin: false,
-          point: 0,
+          foodWaste: 0,
+          organicWaste: 0,
+          plasticWaste: 0,
           idCard: idCard,
         };
         navigation.replace("Tabs", {
@@ -255,6 +264,7 @@ export default function Register({ navigation }) {
                   placeholder="chompu"
                   value={username}
                   onChangeText={setUsername}
+                  maxLength={20}
                 />
                 {errors.username ? (
                   <Text style={styles.errorText}>
@@ -367,10 +377,10 @@ export default function Register({ navigation }) {
                 </View>
               ) : null}
               {errors.imageCard ? (
-                  <Text style={styles.errorText}>
-                    {errors.imageCard}
-                  </Text>
-                ) : null}
+                <Text style={styles.errorText}>
+                  {errors.imageCard}
+                </Text>
+              ) : null}
 
               <Text style={styles.text}>
                 เบอร์โทรศัพท์ :

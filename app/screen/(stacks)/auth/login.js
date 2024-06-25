@@ -164,6 +164,7 @@ const LoginScreen = ({ navigation }) => {
             ]}
             value={username}
             onChangeText={setUsername}
+            maxLength={20}
           />
           {errors.username ? (
             <Text style={styles.errorText}>

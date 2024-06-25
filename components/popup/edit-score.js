@@ -16,7 +16,11 @@ export default function EditScorePopup({
   route,
 }) {
   const [username, setUsername] = useState("");
-  const [score, setScore] = useState(0);
+  const [scoreFoodWaste, setScoreFoodWaste] = useState("0");
+  const [scoreOrganicWaste, setScoreOrganicWaste] =
+    useState("0");
+  const [scorePlasticWaste, setScorePlasticWaste] =
+    useState("0");
   const [errors, setErrors] = useState({});
   const allUsers = route.params.allUsers;
   const tableDataArr = Object.entries(allUsers);
@@ -37,8 +41,17 @@ export default function EditScorePopup({
 
     if (!username)
       errors.username = "กรุณากรอกบัญชีผู้ใช้งาน";
-    if (route.params.text && !score)
-      errors.score = "กรุณากรอกคะแนน";
+    if (route.params.text && !scoreFoodWaste)
+      errors.scoreFoodWaste =
+        "กรุณากรอกคะแนนประเภทเศษอาหาร";
+
+    if (route.params.text && !scoreOrganicWaste)
+      errors.scoreOrganicWaste =
+        "กรุณากรอกคะแนนประเภทขยะอินทรีย์";
+
+    if (route.params.text && !scorePlasticWaste)
+      errors.scorePlasticWaste =
+        "กรุณากรอกคะแนนประเภทขยะพลาสติก";
 
     setErrors(errors);
 
@@ -48,10 +61,8 @@ export default function EditScorePopup({
   const handleSubmit = () => {
     if (validateForm()) {
       Alert.alert(
-        "โปรดยืนยัน",
-        `${action} ${username} ${
-          score ? `จำนวน ${score} คะแนน` : ""
-        }?`,
+        `${action}`,
+        `${action} ${username} ใช่หรือไม่?`,
         [
           {
             text: `ยืนยัน`,
@@ -73,16 +84,50 @@ export default function EditScorePopup({
         data = value[1];
       }
     });
-    let point;
+    let foodWaste;
+    let organicWaste;
+    let plasticWaste;
     if (typeAction == "increase") {
-      point = parseInt(data.point) + parseInt(score);
+      foodWaste =
+        parseInt(data.foodWaste) + parseInt(scoreFoodWaste);
+      organicWaste =
+        parseInt(data.organicWaste) +
+        parseInt(scoreOrganicWaste);
+      plasticWaste =
+        parseInt(data.plasticWaste) +
+        parseInt(scorePlasticWaste);
     }
     if (typeAction == "decrease") {
-      point = parseInt(data.point) - parseInt(score);
-      if (point < 0) {
+      let scoreMinus;
+      foodWaste =
+        parseInt(data.foodWaste) - parseInt(scoreFoodWaste);
+      organicWaste =
+        parseInt(data.organicWaste) -
+        parseInt(scoreOrganicWaste);
+      plasticWaste =
+        parseInt(data.plasticWaste) -
+        parseInt(scorePlasticWaste);
+      if (
+        foodWaste < 0 ||
+        organicWaste < 0 ||
+        plasticWaste < 0
+      ) {
+        if (foodWaste < 0) {
+          scoreMinus = "เศษอาหาร";
+        }
+        if (organicWaste < 0) {
+          if (scoreMinus)
+            scoreMinus = scoreMinus + " และคะแนน";
+          scoreMinus = scoreMinus + "ขยะอินทรีย์";
+        }
+        if (plasticWaste < 0) {
+          if (scoreMinus)
+            scoreMinus = scoreMinus + " และคะแนน";
+          scoreMinus = scoreMinus + "ขยะพลาสติก";
+        }
         Alert.alert(
           `ล้มเหลว`,
-          `คะแนนไม่สามารถต่ำกว่า 0 ได้`,
+          `คะแนน${scoreMinus} ไม่สามารถต่ำกว่า 0 ได้`,
           [
             {
               text: `ตกลง`,
@@ -96,7 +141,9 @@ export default function EditScorePopup({
 
     const updatedData = {
       ...data,
-      point: point,
+      foodWaste: foodWaste,
+      organicWaste: organicWaste,
+      plasticWaste: plasticWaste,
     };
     const updates = {};
     updates["/users/" + data.username] = updatedData;
@@ -128,9 +175,7 @@ export default function EditScorePopup({
       if (!flagError) {
         Alert.alert(
           `สำเร็จ`,
-          `คุณได้${action} ${username} ${
-            score ? `จำนวน ${score} คะแนน` : "สำเร็จ"
-          }`,
+          `คุณได้${action} ${username} สำเร็จแล้ว`,
           [
             {
               text: `ตกลง`,
@@ -148,12 +193,34 @@ export default function EditScorePopup({
       ]);
     }
 
-    setScore(0);
     setErrors({});
   };
 
-  const filterNumber = (string) => {
-    setScore(string.replace(/[^0-9+]/g, ""));
+  const filterNumberFoodWaste = (string) => {
+    const cleanedInput = string.replace(/[^0-9]/g, "");
+    const finalValue =
+      cleanedInput === "" || cleanedInput === "0"
+        ? "0"
+        : cleanedInput.replace(/^0+/, "");
+    setScoreFoodWaste(finalValue);
+  };
+
+  const filterNumberOrganicWaste = (string) => {
+    const cleanedInput = string.replace(/[^0-9]/g, "");
+    const finalValue =
+      cleanedInput === "" || cleanedInput === "0"
+        ? "0"
+        : cleanedInput.replace(/^0+/, "");
+    setScoreOrganicWaste(finalValue);
+  };
+
+  const filterNumberPlasticWaste = (string) => {
+    const cleanedInput = string.replace(/[^0-9]/g, "");
+    const finalValue =
+      cleanedInput === "" || cleanedInput === "0"
+        ? "0"
+        : cleanedInput.replace(/^0+/, "");
+    setScorePlasticWaste(finalValue);
   };
 
   return (
@@ -169,6 +236,7 @@ export default function EditScorePopup({
             placeholder="โปรดกรอกบัญชีผู้ใช้งาน"
             value={username}
             onChangeText={setUsername}
+            maxLength={20}
           />
           {errors.username ? (
             <Text style={styles.errorText}>
@@ -176,28 +244,76 @@ export default function EditScorePopup({
             </Text>
           ) : null}
         </View>
-        {route.params.text ? (
-          <View>
-            <Text style={styles.text}>
-              {"\n"}
-              {route.params.text} :
-            </Text>
-            <View style={styles.form}>
+
+        {/* {route.params.text ? ( */}
+        <View>
+          <Text style={styles.text}>
+            {"\n"}
+            {route.params.text}ประเภทเศษอาหาร :
+          </Text>
+          <View style={styles.form}>
+            <View>
               <TextInput
                 style={styles.input}
                 placeholder="โปรดกรอกจำนวนคะแนน"
-                value={score}
-                onChangeText={filterNumber}
+                value={scoreFoodWaste}
+                onChangeText={filterNumberFoodWaste}
                 keyboardType="numeric"
+                maxLength={6}
               />
-              {errors.score ? (
-                <Text style={styles.errorText}>
-                  {errors.score}
-                </Text>
-              ) : null}
             </View>
+            {errors.scoreFoodWaste ? (
+              <Text style={styles.errorText}>
+                {errors.scoreFoodWaste}
+              </Text>
+            ) : null}
           </View>
-        ) : null}
+
+          <Text style={styles.text}>
+            {"\n"}
+            {route.params.text}ประเภทขยะอินทรีย์ :
+          </Text>
+          <View style={styles.form}>
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="โปรดกรอกจำนวนคะแนน"
+                value={scoreOrganicWaste}
+                onChangeText={filterNumberOrganicWaste}
+                keyboardType="numeric"
+                maxLength={6}
+              />
+            </View>
+            {errors.scoreOrganicWaste ? (
+              <Text style={styles.errorText}>
+                {errors.scoreOrganicWaste}
+              </Text>
+            ) : null}
+          </View>
+
+          <Text style={styles.text}>
+            {"\n"}
+            {route.params.text}ประเภทขยะพลาสติก :
+          </Text>
+          <View style={styles.form}>
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="โปรดกรอกจำนวนคะแนน"
+                value={scorePlasticWaste}
+                onChangeText={filterNumberPlasticWaste}
+                keyboardType="numeric"
+                maxLength={6}
+              />
+            </View>
+            {errors.scorePlasticWaste ? (
+              <Text style={styles.errorText}>
+                {errors.scorePlasticWaste}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        {/* ) : null} */}
       </View>
       <TouchableHighlight
         underlayColor="#ccc"
@@ -206,6 +322,7 @@ export default function EditScorePopup({
           justifyContent: "center",
           alignItems: "center",
           marginTop: 20,
+          borderRadius: 5,
         }}
         onPress={handleSubmit}
       >
