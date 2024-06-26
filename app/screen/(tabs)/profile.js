@@ -80,7 +80,7 @@ export default function ProfileScreen({
         <View style={styles.profileSection}>
           <Text style={styles.text}>ข้อมูลส่วนตัว</Text>
           <Image
-            source={require("../../../assets/images/logo.jpg")}
+            source={require("../../../assets/images/icon.png")}
             style={styles.img}
           />
           <Text style={styles.textSmall}>

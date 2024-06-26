@@ -41,7 +41,7 @@ export default function Point({
               style={[
                 styles.justText,
                 { color: color },
-                { marginTop: "5%" },
+                { marginTop: "6%" },
               ]}
             >
               แต้ม
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   justText: {
     position: "absolute",
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
   },
   styleText: {

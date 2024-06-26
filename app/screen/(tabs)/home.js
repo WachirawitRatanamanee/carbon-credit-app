@@ -165,7 +165,7 @@ export default function HomeScreen({ navigation, route }) {
           }}
         >
           <Image
-            source={require("../../../assets/images/logo.jpg")}
+            source={require("../../../assets/images/icon.png")}
             style={{
               borderRadius:
                 Math.round(
@@ -280,31 +280,36 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         ) : (
           <View>
-          <View style={{flexDirection:"row", justifyContent:"center"}}>
-            <Point
-              text={"คะแนนเศษอาหาร"}
-              point={userPointFoodWaste}
-              icon={
-                <AntDesign
-                  name="pushpin"
-                  size={32}
-                  color="green"
-                />
-              }
-              color="#023020"
-            />
-            <Point
-              text={"คะแนนขยะอินทรีย์"}
-              point={userPointOrganicWaste}
-              icon={
-                <AntDesign
-                  name="pushpin"
-                  size={32}
-                  color="green"
-                />
-              }
-              color="#023020"
-            />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+              }}
+            >
+              <Point
+                text={"คะแนนเศษอาหาร"}
+                point={userPointFoodWaste}
+                icon={
+                  <AntDesign
+                    name="pushpin"
+                    size={32}
+                    color="green"
+                  />
+                }
+                color="#023020"
+              />
+              <Point
+                text={"คะแนนขยะอินทรีย์"}
+                point={userPointOrganicWaste}
+                icon={
+                  <AntDesign
+                    name="pushpin"
+                    size={32}
+                    color="green"
+                  />
+                }
+                color="#023020"
+              />
             </View>
             <Point
               text={"คะแนนขยะพลาสติก"}
