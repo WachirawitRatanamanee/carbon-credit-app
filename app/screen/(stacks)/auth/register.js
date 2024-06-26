@@ -14,7 +14,10 @@ import {
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { auth, database } from "../../../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { ref, set } from "firebase/database";
 import * as ImagePicker from "expo-image-picker";
 
@@ -67,7 +70,10 @@ export default function Register({ navigation }) {
       errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
     }
 
-    if (phone.length != 10) {
+    if (
+      phone.length < 10 ||
+      (phone.length > 10 && phone.length < 12)
+    ) {
       errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
     }
 
@@ -147,34 +153,8 @@ export default function Register({ navigation }) {
       password
     )
       .then(() => {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            const save = set(
-            set(ref(database, "users/" + username), {
-              username: username,
-              name: name,
-              lastname: lastname,
-              phone: phone,
-              admin: false,
-              foodWaste: 0,
-              organicWaste: 0,
-              plasticWaste: 0,
-              idCard: idCard,
-            });
-          }
-        });
-      })
-      .then(() => {
-        Alert.alert(
-          `สมัครสมาชิกสำเร็จ`,
-          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
-          [
-            {
-              text: `ตกลง`,
-            },
-          ]
-        );
-        const userData = {
+        signOut(auth);
+        set(ref(database, "users/" + username), {
           username: username,
           name: name,
           lastname: lastname,
@@ -184,12 +164,19 @@ export default function Register({ navigation }) {
           organicWaste: 0,
           plasticWaste: 0,
           idCard: idCard,
-        };
-        navigation.replace("Tabs", {
-          username: username,
-          userData: userData,
-          allUsers: {},
         });
+      })
+      .then(() => {
+        Alert.alert(
+          `สมัครสมาชิกสำเร็จ`,
+          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
+          [
+            {
+              text: `ตกลง`,
+              onPress: () => navigation.replace("Login"),
+            },
+          ]
+        );
       })
       .catch((error) => {
         err = handleError(error.code);
@@ -393,7 +380,7 @@ export default function Register({ navigation }) {
                   value={phone}
                   onChangeText={filterNumber}
                   keyboardType="numeric"
-                  maxLength={10}
+                  maxLength={12}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>

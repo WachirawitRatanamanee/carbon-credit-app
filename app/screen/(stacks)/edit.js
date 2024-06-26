@@ -49,7 +49,7 @@ export default function Edit({ navigation, route }) {
   const validateForm = () => {
     let errors = {};
 
-    if (phone.length != 10) {
+    if (phone.length < 10 || (phone.length > 10 && phone.length < 12)) {
       errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
     }
 
@@ -298,7 +298,7 @@ export default function Edit({ navigation, route }) {
                   value={phone}
                   onChangeText={filterNumber}
                   keyboardType="numeric"
-                  maxLength={10}
+                  maxLength={12}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
