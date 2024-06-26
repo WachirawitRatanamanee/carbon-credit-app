@@ -22,10 +22,6 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        const username = user.email.replace(
-          "@gmail.com",
-          ""
-        );
         let userData = {};
         const dbRef = ref(database);
         get(child(dbRef, "/users/" + username))
@@ -54,14 +50,13 @@ const LoginScreen = ({ navigation }) => {
               });
             }
           })
-
           .catch((error) => {
             Alert.alert("Something went wrong!", error);
           });
       }
     });
     return unsubscribe;
-  }, []);
+  }, [username]);
 
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => {
@@ -235,9 +230,7 @@ const LoginScreen = ({ navigation }) => {
             </Text>
           </TouchableHighlight>
           <View style={styles.register}>
-            <Text style={styles.label}>
-              ยังไม่มีบัญชี?
-            </Text>
+            <Text style={styles.label}>ยังไม่มีบัญชี?</Text>
             <TouchableHighlight
               underlayColor="#ccc"
               style={{

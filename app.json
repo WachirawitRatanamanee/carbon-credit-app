@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "carbon-credit",
+    "description": "An app to help you track your carbon footprint and offset it with carbon credits.",
     "slug": "carbon-credit",
     "version": "1.0.0",
     "orientation": "portrait",
