@@ -14,12 +14,13 @@ export default function ManageUserButton({
   color = "black",
   myStyle = {},
   marginV = "3%",
+  forTest={}
 }) {
   return (
     <Pressable
       style={[
         styles.container,
-        { marginVertical: marginV },
+        { marginVertical: marginV }, forTest
       ]}
       onPress={whenPress}
     >

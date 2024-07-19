@@ -181,6 +181,25 @@ export default function HomeScreen({ navigation, route }) {
             }}
           />
           <Text style={styles.text}>Carbon-Credit</Text>
+          <ManageUserButton
+            text={`เป็น ${
+              isAdmin ? "Admin" : "User"
+            }\n(สำหรับทดลอง)\nกดเพื่อเปลี่ยน role`}
+            whenPress={() => setIsAdmin(!isAdmin)}
+            icon={
+              <AntDesign
+                name="user"
+                size={24}
+                color="black"
+              />
+            }
+            myStyle={{ fontSize: 14 }}
+            forTest={{
+              position: "absolute",
+              right: "3%",
+              top: "-50%",
+            }}
+          />
         </View>
         {isAdmin ? (
           <View style={styles.table}>
