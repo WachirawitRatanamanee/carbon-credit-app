@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import ManageUserButton from "../../../components/manageUser";
 import Point from "../../../components/point";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+// import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import {
@@ -18,66 +18,110 @@ import {
   Row,
   Cell,
 } from "react-native-table-component";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Element,
   DetailElement,
 } from "../../../components/element";
 import { LogBox } from "react-native";
+import { ref, onValue, off } from "firebase/database";
+import { database } from "../../../firebase";
 LogBox.ignoreLogs(["Warning:"]); // Ignore log notification by message
 
-export default function HomeScreen({ navigation }) {
-  // const isAdmin = false;
-  const [isAdmin, setIsAdmin] = useState(false);
-
+export default function HomeScreen({ navigation, route }) {
+  const userData = route.params.userData;
+  const isAdmin = userData.admin;
+  const userPointFoodWaste = userData.foodWaste;
+  const userPointOrganicWaste = userData.organicWaste;
+  const userPointPlasticWaste = userData.plasticWaste;
+  const username = userData.username;
+  const allUsers = route.params.allUsers;
   const [isExpand, setIsExpand] = useState(false);
+  const tableDataArr = Object.entries(allUsers);
+
+  let tableData = [];
+  let detailData = [];
+  tableDataArr.map((value, index) => {
+    let allUsersData = value[1];
+    tableData.push([
+      allUsersData.username,
+      parseInt(allUsersData.foodWaste),
+      parseInt(allUsersData.organicWaste),
+      parseInt(allUsersData.plasticWaste),
+    ]);
+    detailData.push([
+      allUsersData.name,
+      allUsersData.lastname,
+      allUsersData.phone,
+      allUsersData.idCard,
+    ]);
+  });
+
+  useEffect(() => {
+    const listener = ref(database, "users/" + username);
+    onValue(listener, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        navigation.setParams({
+          userData: data,
+        });
+      }
+    });
+    const listenerAdmin = ref(database, "users/");
+    if (isAdmin) {
+      onValue(listenerAdmin, (snapshot) => {
+        if (snapshot.exists()) {
+          const allUsers = snapshot.val();
+          navigation.setParams({
+            allUsers: allUsers,
+          });
+        }
+      });
+    }
+    return () => {
+      off(listener);
+      off(listenerAdmin);
+    };
+  }, []);
 
   const data = {
-    tableHead: ["ชื่อผู้ใช้งาน", `คะแนน`],
-    tableData: [
-      ["jiw", 6],
-      ["baby", 8],
-      ["testing", 10],
-    ],
-    detailData: [
-      {
-        name: "wachi",
-        lastname: "rata",
-        phone: "0385",
-      },
-      {
-        name: "saaaasing",
-        lastname: "eiei",
-        phone: "6133",
-      },
-      {
-        name: "ttasdasdastt",
-        lastname: "ttt",
-        phone: "9999",
-      },
+    tableHead: [
+      "ผู้ใช้งาน",
+      `เศษอาหาร`,
+      `ขยะอินทรีย์`,
+      `ขยะพลาสติก`,
     ],
   };
 
-  const calculateTotalScore = () => {
+  const calculateTotalScore = (scoreIndex) => {
     let totalScore = 0;
-    data.tableData.map((value, index) => {
-      totalScore += value[1];
+    tableData.map((value, index) => {
+      totalScore += value[scoreIndex];
     });
-    return totalScore + " คะแนน";
+    return totalScore;
   };
 
-  const totalScoreTable = {
-    tableHead: ["คะแนนทั้งหมด", calculateTotalScore()],
-  };
+  const totalScoreTable = [
+    "คะแนนทั้งหมด",
+    calculateTotalScore(1),
+    calculateTotalScore(2),
+    calculateTotalScore(3),
+  ];
 
-  const navigateToTypePopup = () => {
-    navigation.navigate("TypePopup");
-  };
+  // const navigateToTypePopup = () => {
+  //   navigation.navigate("TypePopup");
+  // };
 
-  const navigateToEditScorePopup = (action, text) => {
+  const navigateToEditScorePopup = (
+    action,
+    typeAction,
+    text
+  ) => {
     navigation.navigate("EditScorePopup", {
       action: action,
       text: text,
+      allUsers: allUsers,
+      typeAction: typeAction,
     });
   };
 
@@ -86,7 +130,7 @@ export default function HomeScreen({ navigation }) {
       <Cell
         key={index}
         data={
-          index === 1 ? (
+          index === data.tableHead.length - 1 ? (
             <Element
               data={tableHead}
               isExpand={isExpand}
@@ -110,7 +154,6 @@ export default function HomeScreen({ navigation }) {
         style={styles.imageBackground}
         imageStyle={{ opacity: 0.3 }}
       >
-        <View></View>
         {isAdmin ? (
           <View style={{ marginTop: "5%" }}></View>
         ) : null}
@@ -122,7 +165,7 @@ export default function HomeScreen({ navigation }) {
           }}
         >
           <Image
-            source={require("../../../assets/images/logo.jpg")}
+            source={require("../../../assets/images/icon.png")}
             style={{
               borderRadius:
                 Math.round(
@@ -183,7 +226,7 @@ export default function HomeScreen({ navigation }) {
                   borderColor: "gray",
                 }}
               >
-                {data.tableData.map((rowData, index) => (
+                {tableData.map((rowData, index) => (
                   <TableWrapper>
                     <TableWrapper
                       key={index}
@@ -202,7 +245,14 @@ export default function HomeScreen({ navigation }) {
                           <Cell
                             key={cellIndex}
                             data={cellData}
-                            textStyle={styles.tableTextData}
+                            textStyle={[
+                              styles.tableTextData,
+                              cellIndex == 0
+                                ? { fontWeight: "bold" }
+                                : {
+                                    fontWeight: "normal",
+                                  },
+                            ]}
                           />
                         )
                       )}
@@ -212,7 +262,7 @@ export default function HomeScreen({ navigation }) {
                       <Cell
                         data={
                           <DetailElement
-                            detail={data.detailData[index]}
+                            detail={detailData[index]}
                           />
                         }
                         style={[
@@ -238,7 +288,7 @@ export default function HomeScreen({ navigation }) {
               }}
             >
               <Row
-                data={totalScoreTable.tableHead}
+                data={totalScoreTable}
                 style={styles.tableHead}
                 textStyle={[
                   styles.tableTextHead,
@@ -248,24 +298,56 @@ export default function HomeScreen({ navigation }) {
             </Table>
           </View>
         ) : (
-          <Point
-            text={"คุณมี"}
-            score={"1234569"}
-            icon={
-              <AntDesign
-                name="pushpin"
-                size={32}
-                color="green"
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+              }}
+            >
+              <Point
+                text={"คะแนนเศษอาหาร"}
+                point={userPointFoodWaste}
+                icon={
+                  <AntDesign
+                    name="pushpin"
+                    size={32}
+                    color="green"
+                  />
+                }
+                color="#023020"
               />
-            }
-            color="#023020"
-          />
+              <Point
+                text={"คะแนนขยะอินทรีย์"}
+                point={userPointOrganicWaste}
+                icon={
+                  <AntDesign
+                    name="pushpin"
+                    size={32}
+                    color="green"
+                  />
+                }
+                color="#023020"
+              />
+            </View>
+            <Point
+              text={"คะแนนขยะพลาสติก"}
+              point={userPointPlasticWaste}
+              icon={
+                <AntDesign
+                  name="pushpin"
+                  size={32}
+                  color="green"
+                />
+              }
+              color="#023020"
+            />
+          </View>
         )}
-        <View></View>
-        <View></View>
-        <View></View>
+        {isAdmin ? null : <View></View>}
+
         <View style={styles.button}>
-          {isAdmin ? (
+          {/* {isAdmin ? (
             <ManageUserButton
               text={"ประเภทขยะ"}
               whenPress={navigateToTypePopup}
@@ -291,8 +373,7 @@ export default function HomeScreen({ navigation }) {
                 />
               }
             />
-          )}
-
+          )} */}
           {isAdmin ? (
             <View style={styles.admin}>
               <ManageUserButton
@@ -300,6 +381,7 @@ export default function HomeScreen({ navigation }) {
                 whenPress={() =>
                   navigateToEditScorePopup(
                     "เพิ่มคะแนนผู้ใช้งาน",
+                    "increase",
                     "เพิ่มคะแนน"
                   )
                 }
@@ -311,12 +393,14 @@ export default function HomeScreen({ navigation }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
+                userData={userData}
               />
               <ManageUserButton
                 text={"ลดคะแนน"}
                 whenPress={() =>
                   navigateToEditScorePopup(
                     "ลดคะแนนผู้ใช้งาน",
+                    "decrease",
                     "ลดคะแนน"
                   )
                 }
@@ -328,12 +412,14 @@ export default function HomeScreen({ navigation }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
+                userData={userData}
               />
-              <ManageUserButton
+              {/* <ManageUserButton
                 text={"ลบบัญชี"}
                 whenPress={() =>
                   navigateToEditScorePopup(
-                    "ลบบัญชีผู้ใช้งาน"
+                    "ลบบัญชีผู้ใช้งาน",
+                    "delete",
                   )
                 }
                 icon={
@@ -344,7 +430,8 @@ export default function HomeScreen({ navigation }) {
                   />
                 }
                 myStyle={{ fontSize: 16 }}
-              />
+                userData={userData}
+              /> */}
             </View>
           ) : null}
         </View>
@@ -358,7 +445,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alighItems: "center",
     justifyContent: "space-evenly",
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
@@ -388,13 +475,11 @@ const styles = StyleSheet.create({
     margin: 12,
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 18,
-    flex: 1,
-    textAlignVertical: "center",
+    fontSize: 15,
   },
   tableTextData: {
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     flex: 1,
     textAlignVertical: "center",
     padding: 5,

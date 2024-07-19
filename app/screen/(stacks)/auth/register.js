@@ -8,9 +8,18 @@ import {
   Alert,
   ScrollView,
   ImageBackground,
+  Image,
+  Dimensions,
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { auth, database } from "../../../../firebase";
+import {
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { ref, set } from "firebase/database";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Register({ navigation }) {
   const [username, setUsername] = useState("");
@@ -20,23 +29,65 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
-
+  const [idCard, setIdCard] = useState(0);
   const [errors, setErrors] = useState({});
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
+  const [image, setImage] = useState(null);
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
-
   const toggleShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   const validateForm = () => {
     let errors = {};
+
+    if (username.length < 2) {
+      errors.username =
+        "ชื่อผู้ใช้งานต้องมีอย่างน้อย 2 ตัวอักษร";
+    }
+
+    if (
+      !/^(?=[a-zA-Z0-9._]{1,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/g.test(
+        username
+      )
+    ) {
+      errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
+    }
+
+    if (
+      phone.length < 10 ||
+      (phone.length > 10 && phone.length < 12)
+    ) {
+      errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+    }
+
+    if (password.length < 6) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
+    if (idCard.length != 13) {
+      errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
+    }
+
+    if (!image)
+      errors.imageCard = "กรุณาเลือกรูปภาพบัตรประชาชน";
 
     if (!username)
       errors.username = "กรุณากรอกชื่อผู้ใช้งาน";
@@ -46,6 +97,7 @@ export default function Register({ navigation }) {
     if (!password) errors.password = "กรุณากรอกรหัสผ่าน";
     if (!confirmPassword)
       errors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
+    if (!idCard) errors.idCard = "กรุณากรอกเลขบัตรประชาชน";
 
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
@@ -72,17 +124,68 @@ export default function Register({ navigation }) {
     }
   };
 
+  const handleError = (error) => {
+    switch (error) {
+      case "auth/account-exists-with-different-credential":
+      case "auth/email-already-in-use":
+        return "ชื่อผู้ใช้งานนี้ถูกใช้แล้ว";
+      case "auth/wrong-password":
+        return "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+      case "auth/user-not-found":
+        return "ไม่พบผู้ใช้ด้วยชื่อบัญชีนี้";
+      case "auth/user-disabled":
+        return "ผู้ใช้ถูกระงับ";
+      case "auth/too-many-requests":
+        return "มีคำร้องขอเข้าสู่ระบบมากเกินไปสำหรับบัญชีนี้";
+      case "auth/operation-not-allowed":
+        return "เกิดข้อผิดพลาดบนเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง";
+      case "auth/invalid-email":
+        return "ชื่อผู้ใช้งานนี้ไม่ถูกต้อง";
+      default:
+        return "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง";
+    }
+  };
+
   const sendData = () => {
-    Alert.alert(
-      `สมัครสมาชิกสำเร็จ`,
-      `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
-      [
-        {
-          text: `ตกลง`,
-        },
-      ]
-    );
-    navigation.goBack();
+    createUserWithEmailAndPassword(
+      auth,
+      username + "@gmail.com",
+      password
+    )
+      .then(() => {
+        signOut(auth);
+        set(ref(database, "users/" + username), {
+          username: username,
+          name: name,
+          lastname: lastname,
+          phone: phone,
+          admin: false,
+          foodWaste: 0,
+          organicWaste: 0,
+          plasticWaste: 0,
+          idCard: idCard,
+        });
+      })
+      .then(() => {
+        Alert.alert(
+          `สมัครสมาชิกสำเร็จ`,
+          `ข้อมูลของคุณได้รับการบันทึกแล้ว`,
+          [
+            {
+              text: `ตกลง`,
+              onPress: () => navigation.replace("Login"),
+            },
+          ]
+        );
+      })
+      .catch((error) => {
+        err = handleError(error.code);
+        Alert.alert(``, `${err}`, [
+          {
+            text: `ตกลง`,
+          },
+        ]);
+      });
   };
 
   const cancel = () => {
@@ -100,7 +203,7 @@ export default function Register({ navigation }) {
         [
           {
             text: `ยืนยัน`,
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.replace("Login"),
           },
           {
             text: "ยกเลิก",
@@ -108,8 +211,16 @@ export default function Register({ navigation }) {
         ]
       );
     } else {
-      navigation.goBack();
+      navigation.replace("Login");
     }
+  };
+
+  const filterNumber = (string) => {
+    setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
+  const filterId = (string) => {
+    setIdCard(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -117,7 +228,7 @@ export default function Register({ navigation }) {
       source={require("../../../../assets/images/login-bg.jpg")}
       resizeMode="cover"
       style={styles.imageBackground}
-      imageStyle={{ opacity: 0.1 }}
+      imageStyle={{ opacity: 0.4 }}
     >
       <KeyboardAvoidingView
         behavior="padding"
@@ -136,9 +247,10 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.username ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อผู้ใช้งาน"
+                  placeholder="chompu"
                   value={username}
                   onChangeText={setUsername}
+                  maxLength={20}
                 />
                 {errors.username ? (
                   <Text style={styles.errorText}>
@@ -153,7 +265,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.name ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อ"
+                  placeholder="สุขกาย"
                   value={name}
                   onChangeText={setName}
                 />
@@ -171,7 +283,7 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.lastname ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกนามสกุล"
+                  placeholder="สบายใจ"
                   value={lastname}
                   onChangeText={setLastname}
                 />
@@ -183,6 +295,80 @@ export default function Register({ navigation }) {
               </View>
 
               <Text style={styles.text}>
+                เลขบัตรประชาชน :
+              </Text>
+
+              <View style={styles.form}>
+                <View
+                  style={[
+                    styles.input,
+                    styles.passwordForm,
+                    errors.idCard ? styles.ifError : {},
+                  ]}
+                >
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={idCard}
+                    onChangeText={filterId}
+                    keyboardType="numeric"
+                    maxLength={13}
+                  />
+                  <MaterialCommunityIcons
+                    name="image"
+                    size={26}
+                    color="gray"
+                    onPress={pickImage}
+                    style={styles.hiddenIcon}
+                  />
+                </View>
+                {errors.idCard ? (
+                  <Text style={styles.errorText}>
+                    {errors.idCard}
+                  </Text>
+                ) : null}
+              </View>
+              {image ? (
+                <View style={styles.image}>
+                  <Image
+                    source={{ uri: image }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: 10,
+                    }}
+                  />
+                  <TouchableHighlight
+                    underlayColor={false}
+                    activeOpacity={0.6}
+                    style={{
+                      borderRadius: 5,
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                    }}
+                    onPress={() => setImage(null)}
+                  >
+                    <Text
+                      style={{
+                        color: "darkred",
+                        padding: 10,
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        textAlign: "center",
+                      }}
+                    >
+                      X
+                    </Text>
+                  </TouchableHighlight>
+                </View>
+              ) : null}
+              {errors.imageCard ? (
+                <Text style={styles.errorText}>
+                  {errors.imageCard}
+                </Text>
+              ) : null}
+
+              <Text style={styles.text}>
                 เบอร์โทรศัพท์ :
               </Text>
               <View style={styles.form}>
@@ -191,10 +377,10 @@ export default function Register({ navigation }) {
                     styles.input,
                     errors.phone ? styles.ifError : {},
                   ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={filterNumber}
                   keyboardType="numeric"
+                  maxLength={12}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
@@ -217,7 +403,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={showPassword ? "eye" : "eye-off"}
@@ -254,7 +439,6 @@ export default function Register({ navigation }) {
                     secureTextEntry={!showConfirmPassword}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
-                    placeholder="โปรดยืนยันรหัสผ่าน"
                   />
                   <MaterialCommunityIcons
                     name={
@@ -310,7 +494,7 @@ export default function Register({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
@@ -375,5 +559,15 @@ const styles = StyleSheet.create({
   },
   ifError: {
     marginBottom: 5,
+  },
+  image: {
+    width: Dimensions.get("window").width * 0.7,
+    height: Dimensions.get("window").width * 0.7,
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: "darkgreen",
+    borderRadius: 10,
+    marginTop: 5,
+    marginBottom: 10,
   },
 });

@@ -12,7 +12,7 @@ export default function Point({
   icon = null,
   color = "black",
   myStyle = {},
-  score = 0,
+  point = 0,
 }) {
   return (
     <Pressable style={styles.container} onPress={whenPress}>
@@ -22,12 +22,11 @@ export default function Point({
             position: "absolute",
           }}
         >
-          {icon}
+          {/* {icon} */}
         </View>
         <View style={styles.circle}></View>
         <View style={styles.styleText}>
-          <Text style={[styles.justText, { color: color }]}>
-            {"\n"}
+          <Text style={[styles.justText, { color: color, marginTop:"22%",}]}>
             {text}
           </Text>
         </View>
@@ -35,14 +34,14 @@ export default function Point({
           <Text
             style={[styles.text, { color: color }, myStyle]}
           >
-            {score}
+            {point}
           </Text>
           <View style={styles.styleText}>
             <Text
               style={[
                 styles.justText,
                 { color: color },
-                { marginTop: 2 },
+                { marginTop: "6%" },
               ]}
             >
               แต้ม
@@ -56,9 +55,12 @@ export default function Point({
 
 const styles = StyleSheet.create({
   container: {
+    // borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    alignSelf: "center",
+    // alignSelf: "center",
+    marginHorizontal:"2%",
+    marginBottom:"2%",
   },
   point: {
     borderWidth: 2,
@@ -75,7 +77,7 @@ const styles = StyleSheet.create({
   },
   justText: {
     position: "absolute",
-    fontSize: 24,
+    fontSize: 15,
     textAlign: "center",
   },
   styleText: {
@@ -98,5 +100,5 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").width * 0.45,
     position: "absolute",
     backgroundColor: "rgba(0, 64, 0, 0.1)",
-  }
+  },
 });

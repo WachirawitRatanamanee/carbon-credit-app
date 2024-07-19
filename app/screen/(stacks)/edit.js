@@ -11,16 +11,23 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ref, update } from "firebase/database";
+import { auth, database } from "../../../firebase";
+import { updatePassword } from "firebase/auth";
 
 export default function Edit({ navigation, route }) {
-  const defaultUsername = route.params.username;
-  const defaultName = route.params.name;
-  const defaultLastname = route.params.lastname;
-  const defaultPhone = route.params.phone;
+  const userData = route.params.userData;
+  const defaultUsername = userData.username? userData.username : "";
+  const defaultName = userData.name? userData.name : "";
+  const defaultLastname = userData.lastname? userData.lastname : "";
+  const defaultPhone = userData.phone? userData.phone : "";
+  const defaultIdCard = userData.idCard? userData.idCard : "";
 
   const [name, setName] = useState(defaultName);
   const [lastname, setLastname] = useState(defaultLastname);
   const [phone, setPhone] = useState(defaultPhone);
+  const [idCard, setIdCard] = useState(defaultIdCard);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
@@ -42,6 +49,19 @@ export default function Edit({ navigation, route }) {
   const validateForm = () => {
     let errors = {};
 
+    if (phone.length < 10 || (phone.length > 10 && phone.length < 12)) {
+      errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+    }
+
+    if (password.length < 6 && password.length > 0) {
+      errors.password =
+        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    }
+
+    if (idCard.length != 13 && idCard.length > 0) {
+      errors.idCard = "เลขบัตรประชาชนไม่ถูกต้อง";
+    }
+
     if (!name)
       errors.name = "กรุณากรอกชื่อที่ต้องการเปลี่ยน";
     if (!lastname)
@@ -49,6 +69,7 @@ export default function Edit({ navigation, route }) {
     if (!phone)
       errors.phone =
         "กรุณากรอกเบอร์โทรศัพท์ที่ต้องการเปลี่ยน";
+    if (!idCard) errors.idCard = "กรุณากรอกเลขบัตรประชาชน";
 
     if (password !== confirmPassword)
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
@@ -63,8 +84,8 @@ export default function Edit({ navigation, route }) {
         name != defaultName ||
         lastname != defaultLastname ||
         phone != defaultPhone ||
-        password ||
-        confirmPassword
+        idCard != defaultIdCard ||
+        (password && confirmPassword)
       ) {
         Alert.alert(
           "โปรดยืนยัน",
@@ -85,17 +106,56 @@ export default function Edit({ navigation, route }) {
     }
   };
 
+  const updateData = (name, lastname, phone, idCard) => {
+    const updatedData = {
+      ...userData,
+      name: name,
+      lastname: lastname,
+      phone: phone,
+      idCard: idCard,
+    };
+    const updates = {};
+    updates["/users/" + defaultUsername] = updatedData;
+
+    return update(ref(database), updates);
+  };
+
+  const updateUserPassword = (password) => {
+    const user = auth.currentUser;
+    updatePassword(user, password);
+  };
+
   const sendData = () => {
-    Alert.alert(
-      `สำเร็จ`,
-      `ข้อมูลของคุณได้รับการเปลี่ยนแปลงแล้ว`,
-      [
+    try {
+      if (
+        name != defaultName ||
+        lastname != defaultLastname ||
+        phone != defaultPhone ||
+        idCard != defaultIdCard
+      ) {
+        updateData(name, lastname, phone, idCard);
+      }
+      if (password && confirmPassword) {
+        updateUserPassword(password);
+      }
+      Alert.alert(
+        `สำเร็จ`,
+        `ข้อมูลของคุณได้รับการเปลี่ยนแปลงแล้ว`,
+        [
+          {
+            text: `ตกลง`,
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    } catch (error) {
+      err = error.code;
+      Alert.alert(``, `${err}`, [
         {
           text: `ตกลง`,
         },
-      ]
-    );
-    navigation.goBack();
+      ]);
+    }
   };
 
   const cancel = () => {
@@ -103,6 +163,7 @@ export default function Edit({ navigation, route }) {
       name != defaultName ||
       lastname != defaultLastname ||
       phone != defaultPhone ||
+      idCard != defaultIdCard ||
       password ||
       confirmPassword
     ) {
@@ -122,6 +183,14 @@ export default function Edit({ navigation, route }) {
     } else {
       navigation.goBack();
     }
+  };
+
+  const filterNumber = (string) => {
+    setPhone(string.replace(/[^0-9+]/g, ""));
+  };
+
+  const filterId = (string) => {
+    setIdCard(string.replace(/[^0-9+]/g, ""));
   };
 
   return (
@@ -159,7 +228,7 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกชื่อที่ต้องการเปลี่ยน"
+                  placeholder="กรอกชื่อที่ต้องการ"
                   value={name}
                   onChangeText={setName}
                 />
@@ -177,13 +246,41 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกนามสกุลที่ต้องการเปลี่ยน"
+                  placeholder="กรอกนามสกุลที่ต้องการ"
                   value={lastname}
                   onChangeText={setLastname}
                 />
                 {errors.lastname ? (
                   <Text style={styles.errorText}>
                     {errors.lastname}
+                  </Text>
+                ) : null}
+              </View>
+
+              <Text style={styles.text}>
+                เลขบัตรประชาชน :
+              </Text>
+
+              <View style={styles.form}>
+                <View
+                  style={[
+                    styles.input,
+                    styles.passwordForm,
+                    errors.idCard ? styles.ifError : {},
+                  ]}
+                >
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="กรอกเลขบัตรที่ต้องการ"
+                    value={idCard}
+                    onChangeText={filterId}
+                    keyboardType="numeric"
+                    maxLength={13}
+                  />
+                </View>
+                {errors.idCard ? (
+                  <Text style={styles.errorText}>
+                    {errors.idCard}
                   </Text>
                 ) : null}
               </View>
@@ -197,10 +294,11 @@ export default function Edit({ navigation, route }) {
                     styles.input,
                     errors.name ? { marginBottom: 5 } : {},
                   ]}
-                  placeholder="โปรดกรอกเบอร์โทรศัพท์ที่ต้องการเปลี่ยน"
+                  placeholder="กรอกเบอร์โทรศัพท์ที่ต้องการ"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={filterNumber}
                   keyboardType="numeric"
+                  maxLength={12}
                 />
                 {errors.phone ? (
                   <Text style={styles.errorText}>
@@ -224,7 +322,7 @@ export default function Edit({ navigation, route }) {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="โปรดกรอกรหัสผ่านที่ต้องการ"
+                    placeholder="กรอกรหัสผ่านที่ต้องการ"
                   />
                   <MaterialCommunityIcons
                     name={showPassword ? "eye" : "eye-off"}
@@ -234,6 +332,11 @@ export default function Edit({ navigation, route }) {
                     onPress={toggleShowPassword}
                   />
                 </View>
+                {errors.password ? (
+                  <Text style={styles.errorText}>
+                    {errors.password}
+                  </Text>
+                ) : null}
               </View>
 
               <Text style={styles.text}>
@@ -310,7 +413,7 @@ export default function Edit({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,360,0,0.07)",
+    // backgroundColor: "rgba(0,360,0,0.07)",
   },
   imageBackground: {
     flex: 1,
@@ -365,6 +468,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
+    borderRadius: 5,
   },
   buttonText: {
     color: "white",

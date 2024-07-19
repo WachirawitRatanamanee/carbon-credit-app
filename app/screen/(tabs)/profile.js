@@ -9,12 +9,37 @@ import {
 import PressButton from "../../../components/pressButton";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { auth } from "../../../firebase";
+import { signOut } from "firebase/auth";
+import { useEffect } from "react";
+import { ref, onValue, off } from "firebase/database";
+import { database } from "../../../firebase";
 
-export default function ProfileScreen({ navigation }) {
-  const navigateToEdit = (action, text) => {
+export default function ProfileScreen({
+  navigation,
+  route,
+}) {
+  const userData = route.params.userData;
+  const name = userData.name;
+  const lastname = userData.lastname;
+  const username = userData.username;
+
+  useEffect(() => {
+    const listener = ref(database, "users/" + username);
+    onValue(listener, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        navigation.setParams({
+          userData: data,
+        });
+      }
+    });
+    return () => off(listener);
+  }, []);
+
+  const navigateToEdit = (userData) => {
     navigation.navigate("Edit", {
-      action: action,
-      text: text,
+      userData: userData,
     });
   };
 
@@ -23,16 +48,25 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const logout = () => {
-    // confirm
     Alert.alert("โปรดยืนยัน", "ท่านต้องการออกจากระบบ?", [
       {
         text: "ยืนยัน",
-        onPress: () => navigation.navigate("Login"),
+        onPress: handleSignOut,
       },
       {
         text: "ยกเลิก",
       },
     ]);
+  };
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        navigation.replace("Login");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   return (
@@ -46,23 +80,18 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.profileSection}>
           <Text style={styles.text}>ข้อมูลส่วนตัว</Text>
           <Image
-            source={require("../../../assets/images/logo.jpg")}
+            source={require("../../../assets/images/icon.png")}
             style={styles.img}
           />
           <Text style={styles.textSmall}>
-            name lastname
+            {name} {lastname}
           </Text>
-          <Text style={styles.textSmaller}>uid</Text>
+          <Text style={styles.textSmaller}>{username}</Text>
         </View>
         <View style={styles.pressSection}>
           <PressButton
             text={"แก้ไขข้อมูลส่วนตัว"}
-            whenPress={() =>
-              navigateToEdit(
-                "เพิ่มคะแนนผู้ใช้งาน",
-                "เพิ่มคะแนน"
-              )
-            }
+            whenPress={() => navigateToEdit(userData)}
             icon={
               <FontAwesome5
                 name="user-edit"
@@ -71,9 +100,9 @@ export default function ProfileScreen({ navigation }) {
               />
             }
             next={true}
-            containerStyle={{ borderBottomWidth: 0 }}
+            // containerStyle={{ borderBottomWidth: 0 }}
           />
-          <PressButton
+          {/* <PressButton
             text={"วิธีใช้งานแอพพลิเคชั่น"}
             whenPress={navigateToTutorialPopup}
             icon={
@@ -84,7 +113,7 @@ export default function ProfileScreen({ navigation }) {
               />
             }
             next={true}
-          />
+          /> */}
           <PressButton
             text={"ออกจากระบบ"}
             whenPress={logout}
@@ -105,7 +134,7 @@ const styles = StyleSheet.create({
   imageBackground: {
     flex: 1,
     justifyContent: "space-around",
-    backgroundColor: "rgba(0,360,0,0.1)",
+    // backgroundColor: "rgba(0,360,0,0.1)",
   },
   profileSection: {
     alignItems: "center",

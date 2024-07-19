@@ -1,17 +1,17 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screen/(tabs)/home";
 import ProfileScreen from "./screen/(tabs)/profile";
-import HistoryScreen from "./screen/(tabs)/history";
+// import HistoryScreen from "./screen/(tabs)/history";
 import { AntDesign } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
-export default function Tabs() {
+export default function Tabs({ route }) {
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        // tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === "Home") {
@@ -39,11 +39,16 @@ export default function Tabs() {
         tabBarShowLabel: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        initialParams={route.params}
+      />
       {/* <Tab.Screen name="History" component={HistoryScreen}/> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
+        initialParams={route.params}
       />
     </Tab.Navigator>
   );

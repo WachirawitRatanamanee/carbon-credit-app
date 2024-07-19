@@ -5,7 +5,6 @@ import {
   View,
   StyleSheet,
 } from "react-native";
-import { useState } from "react";
 
 module.exports = {
   DetailElement: function ({ detail }) {
@@ -15,21 +14,28 @@ module.exports = {
           {" "}
           ชื่อ:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.name}
+            {detail[0]}
           </Text>
         </Text>
         <Text style={styles.text}>
           {" "}
           นามสกุล:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.lastname}
+            {detail[1]}
           </Text>
         </Text>
         <Text style={styles.text}>
           {" "}
           เบอร์โทร:{" "}
           <Text style={[styles.text, styles.data]}>
-            {detail.phone}
+            {detail[2]}
+          </Text>
+        </Text>
+        <Text style={styles.text}>
+          {" "}
+          เลขบัตรประชาชน:{" "}
+          <Text style={[styles.text, styles.data]}>
+            {detail[3]}
           </Text>
         </Text>
       </View>
@@ -51,15 +57,15 @@ module.exports = {
       >
         <Text style={myStyle}>{data}</Text>
         <View style={{ position: "relative" }}>
-          <View
-            style={{
-              position: "absolute",
-              right: 12,
-              top: -8,
-            }}
-          >
-            <Pressable
-              onPress={() => setIsExpand(!isExpand)}
+          <Pressable onPress={() => setIsExpand(!isExpand)}>
+            <View
+              style={{
+                position: "absolute",
+                right: -5,
+                bottom: 0,
+                padding: 10,
+                borderRadius:5
+              }}
             >
               <View>
                 {isExpand ? (
@@ -76,8 +82,8 @@ module.exports = {
                   />
                 )}
               </View>
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
         </View>
       </View>
     );
@@ -86,12 +92,13 @@ module.exports = {
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 15,
+    fontSize: 14,
     padding: 5,
     color: "#333",
   },
   data: {
     fontWeight: "bold",
     color: "black",
+    fontSize: 15,
   },
 });
