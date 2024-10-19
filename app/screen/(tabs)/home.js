@@ -12,17 +12,9 @@ import Point from "../../../components/point";
 // import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import {
-  Table,
-  TableWrapper,
-  Row,
-  Cell,
-} from "react-native-table-component";
+import { Table, TableWrapper, Row, Cell } from "react-native-table-component";
 import { useState, useEffect } from "react";
-import {
-  Element,
-  DetailElement,
-} from "../../../components/element";
+import { Element, DetailElement } from "../../../components/element";
 import { LogBox } from "react-native";
 import { ref, onValue, off } from "firebase/database";
 import { database } from "../../../firebase";
@@ -43,22 +35,24 @@ export default function HomeScreen({ navigation, route }) {
   let detailData = [];
   tableDataArr.map((value, index) => {
     let allUsersData = value[1];
-    tableData.push([
-      allUsersData.username,
-      parseInt(allUsersData.foodWaste),
-      parseInt(allUsersData.organicWaste),
-      parseInt(allUsersData.plasticWaste),
-    ]);
-    detailData.push([
-      allUsersData.name,
-      allUsersData.lastname,
-      allUsersData.phone,
-      allUsersData.idCard,
-    ]);
+    if (!allUsersData.admin) {
+      tableData.push([
+        allUsersData.username,
+        parseInt(allUsersData.foodWaste),
+        parseInt(allUsersData.organicWaste),
+        parseInt(allUsersData.plasticWaste),
+      ]);
+      detailData.push([
+        allUsersData.name,
+        allUsersData.lastname,
+        allUsersData.phone,
+        allUsersData.idCard,
+      ]);
+    }
   });
 
   useEffect(() => {
-    const listener = ref(database, "users/" + username);
+    const listener = ref(database, "users/" + username.toLowerCase());
     onValue(listener, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -85,12 +79,7 @@ export default function HomeScreen({ navigation, route }) {
   }, []);
 
   const data = {
-    tableHead: [
-      "ผู้ใช้งาน",
-      `เศษอาหาร`,
-      `ขยะอินทรีย์`,
-      `ขยะพลาสติก`,
-    ],
+    tableHead: ["ผู้ใช้งาน", `เศษอาหาร`, `ขยะอินทรีย์`, `ขยะพลาสติก`],
   };
 
   const calculateTotalScore = (scoreIndex) => {
@@ -112,11 +101,7 @@ export default function HomeScreen({ navigation, route }) {
   //   navigation.navigate("TypePopup");
   // };
 
-  const navigateToEditScorePopup = (
-    action,
-    typeAction,
-    text
-  ) => {
+  const navigateToEditScorePopup = (action, typeAction, text) => {
     navigation.navigate("EditScorePopup", {
       action: action,
       text: text,
@@ -125,26 +110,24 @@ export default function HomeScreen({ navigation, route }) {
     });
   };
 
-  const tableHeadWithDescription = data.tableHead.map(
-    (tableHead, index) => (
-      <Cell
-        key={index}
-        data={
-          index === data.tableHead.length - 1 ? (
-            <Element
-              data={tableHead}
-              isExpand={isExpand}
-              setIsExpand={setIsExpand}
-              myStyle={styles.tableTextHead}
-            />
-          ) : (
-            tableHead
-          )
-        }
-        textStyle={styles.tableTextHead}
-      />
-    )
-  );
+  const tableHeadWithDescription = data.tableHead.map((tableHead, index) => (
+    <Cell
+      key={index}
+      data={
+        index === data.tableHead.length - 1 ? (
+          <Element
+            data={tableHead}
+            isExpand={isExpand}
+            setIsExpand={setIsExpand}
+            myStyle={styles.tableTextHead}
+          />
+        ) : (
+          tableHead
+        )
+      }
+      textStyle={styles.tableTextHead}
+    />
+  ));
 
   return (
     <View style={styles.container}>
@@ -154,9 +137,7 @@ export default function HomeScreen({ navigation, route }) {
         style={styles.imageBackground}
         imageStyle={{ opacity: 0.3 }}
       >
-        {isAdmin ? (
-          <View style={{ marginTop: "5%" }}></View>
-        ) : null}
+        {isAdmin ? <View style={{ marginTop: "5%" }}></View> : null}
         <View
           style={{
             flexDirection: "row",
@@ -168,20 +149,16 @@ export default function HomeScreen({ navigation, route }) {
             source={require("../../../assets/images/icon.png")}
             style={{
               borderRadius:
-                Math.round(
-                  Dimensions.get("window").width +
-                    Dimensions.get("window").height
-                ) / 2,
+                Math.round(Dimensions.get("window").width + Dimensions.get("window").height) / 2,
               width: Dimensions.get("window").width * 0.175,
-              height:
-                Dimensions.get("window").width * 0.175,
+              height: Dimensions.get("window").width * 0.175,
               position: "absolute",
               left: "5%",
               top: "-30%",
             }}
           />
           <Text style={styles.text}>Carbon-Credit</Text>
-          <ManageUserButton
+          {/* <ManageUserButton
             text={`เป็น ${
               isAdmin ? "Admin" : "User"
             }\n(สำหรับทดลอง)\nกดเพื่อเปลี่ยน role`}
@@ -199,7 +176,7 @@ export default function HomeScreen({ navigation, route }) {
               right: "3%",
               top: "-50%",
             }}
-          />
+          /> */}
         </View>
         {isAdmin ? (
           <View style={styles.table}>
@@ -211,10 +188,7 @@ export default function HomeScreen({ navigation, route }) {
                     borderColor: "gray",
                   }}
                 >
-                  <Row
-                    data={tableHeadWithDescription}
-                    style={styles.tableHead}
-                  />
+                  <Row data={tableHeadWithDescription} style={styles.tableHead} />
                 </Table>
               </ScrollView>
             </View>
@@ -233,44 +207,32 @@ export default function HomeScreen({ navigation, route }) {
                       style={[
                         styles.row,
                         {
-                          backgroundColor:
-                            index % 2
-                              ? "#cefad0"
-                              : "#F7F6E7",
+                          backgroundColor: index % 2 ? "#cefad0" : "#F7F6E7",
                         },
                       ]}
                     >
-                      {rowData.map(
-                        (cellData, cellIndex) => (
-                          <Cell
-                            key={cellIndex}
-                            data={cellData}
-                            textStyle={[
-                              styles.tableTextData,
-                              cellIndex == 0
-                                ? { fontWeight: "bold" }
-                                : {
-                                    fontWeight: "normal",
-                                  },
-                            ]}
-                          />
-                        )
-                      )}
+                      {rowData.map((cellData, cellIndex) => (
+                        <Cell
+                          key={cellIndex}
+                          data={cellData}
+                          textStyle={[
+                            styles.tableTextData,
+                            cellIndex == 0
+                              ? { fontWeight: "bold" }
+                              : {
+                                  fontWeight: "normal",
+                                },
+                          ]}
+                        />
+                      ))}
                     </TableWrapper>
 
                     {isExpand ? (
                       <Cell
-                        data={
-                          <DetailElement
-                            detail={detailData[index]}
-                          />
-                        }
+                        data={<DetailElement detail={detailData[index]} />}
                         style={[
                           {
-                            backgroundColor:
-                              index % 2
-                                ? "#cefad0"
-                                : "#F7F6E7",
+                            backgroundColor: index % 2 ? "#cefad0" : "#F7F6E7",
                           },
                         ]}
                       />
@@ -290,10 +252,7 @@ export default function HomeScreen({ navigation, route }) {
               <Row
                 data={totalScoreTable}
                 style={styles.tableHead}
-                textStyle={[
-                  styles.tableTextHead,
-                  { flex: 0 },
-                ]}
+                textStyle={[styles.tableTextHead, { flex: 0 }]}
               />
             </Table>
           </View>
@@ -308,38 +267,20 @@ export default function HomeScreen({ navigation, route }) {
               <Point
                 text={"คะแนนเศษอาหาร"}
                 point={userPointFoodWaste}
-                icon={
-                  <AntDesign
-                    name="pushpin"
-                    size={32}
-                    color="green"
-                  />
-                }
+                icon={<AntDesign name="pushpin" size={32} color="green" />}
                 color="#023020"
               />
               <Point
                 text={"คะแนนขยะอินทรีย์"}
                 point={userPointOrganicWaste}
-                icon={
-                  <AntDesign
-                    name="pushpin"
-                    size={32}
-                    color="green"
-                  />
-                }
+                icon={<AntDesign name="pushpin" size={32} color="green" />}
                 color="#023020"
               />
             </View>
             <Point
               text={"คะแนนขยะพลาสติก"}
               point={userPointPlasticWaste}
-              icon={
-                <AntDesign
-                  name="pushpin"
-                  size={32}
-                  color="green"
-                />
-              }
+              icon={<AntDesign name="pushpin" size={32} color="green" />}
               color="#023020"
             />
           </View>
@@ -379,38 +320,18 @@ export default function HomeScreen({ navigation, route }) {
               <ManageUserButton
                 text={"เพิ่มคะแนน"}
                 whenPress={() =>
-                  navigateToEditScorePopup(
-                    "เพิ่มคะแนนผู้ใช้งาน",
-                    "increase",
-                    "เพิ่มคะแนน"
-                  )
+                  navigateToEditScorePopup("เพิ่มคะแนนผู้ใช้งาน", "increase", "เพิ่มคะแนน")
                 }
-                icon={
-                  <Feather
-                    name="user-plus"
-                    size={32}
-                    color="black"
-                  />
-                }
+                icon={<Feather name="user-plus" size={32} color="black" />}
                 myStyle={{ fontSize: 16 }}
                 userData={userData}
               />
               <ManageUserButton
                 text={"ลดคะแนน"}
                 whenPress={() =>
-                  navigateToEditScorePopup(
-                    "ลดคะแนนผู้ใช้งาน",
-                    "decrease",
-                    "ลดคะแนน"
-                  )
+                  navigateToEditScorePopup("ลดคะแนนผู้ใช้งาน", "decrease", "ลดคะแนน")
                 }
-                icon={
-                  <Feather
-                    name="user-minus"
-                    size={32}
-                    color="black"
-                  />
-                }
+                icon={<Feather name="user-minus" size={32} color="black" />}
                 myStyle={{ fontSize: 16 }}
                 userData={userData}
               />

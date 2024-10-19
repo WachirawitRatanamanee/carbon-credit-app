@@ -24,7 +24,7 @@ const LoginScreen = ({ navigation }) => {
       if (user) {
         let userData = {};
         const dbRef = ref(database);
-        get(child(dbRef, "/users/" + username))
+        get(child(dbRef, "/users/" + username.toLowerCase()))
           .then((snapshot) => {
             if (snapshot.exists()) {
               userData = snapshot.val();
@@ -35,7 +35,7 @@ const LoginScreen = ({ navigation }) => {
                   if (newSnapshot.exists()) {
                     const allUsers = newSnapshot.val();
                     navigation.replace("Tabs", {
-                      username: username,
+                      username: username.toLowerCase(),
                       userData: userData,
                       allUsers: allUsers,
                     });
@@ -44,7 +44,7 @@ const LoginScreen = ({ navigation }) => {
               );
             } else {
               navigation.replace("Tabs", {
-                username: username,
+                username: username.toLowerCase(),
                 userData: userData,
                 allUsers: {},
               });
@@ -116,7 +116,7 @@ const LoginScreen = ({ navigation }) => {
     if (validateForm()) {
       signInWithEmailAndPassword(
         auth,
-        username + "@gmail.com",
+        username.toLowerCase() + "@gmail.com",
         password
       ).catch((error) => {
         err = handleError(error.code);
@@ -157,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
               styles.input,
               errors.username ? styles.ifError : {},
             ]}
-            value={username}
+            value={username.toLowerCase()}
             onChangeText={setUsername}
             maxLength={20}
           />

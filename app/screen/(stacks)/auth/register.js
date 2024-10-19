@@ -149,13 +149,13 @@ export default function Register({ navigation }) {
   const sendData = () => {
     createUserWithEmailAndPassword(
       auth,
-      username + "@gmail.com",
+      username.toLowerCase() + "@gmail.com",
       password
     )
       .then(() => {
         signOut(auth);
-        set(ref(database, "users/" + username), {
-          username: username,
+        set(ref(database, "users/" + username.toLowerCase()), {
+          username: username.toLowerCase(),
           name: name,
           lastname: lastname,
           phone: phone,
@@ -248,7 +248,7 @@ export default function Register({ navigation }) {
                     errors.username ? styles.ifError : {},
                   ]}
                   placeholder="chompu"
-                  value={username}
+                  value={username.toLowerCase()}
                   onChangeText={setUsername}
                   maxLength={20}
                 />

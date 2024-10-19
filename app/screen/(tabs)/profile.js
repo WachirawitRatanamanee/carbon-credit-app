@@ -25,7 +25,7 @@ export default function ProfileScreen({
   const username = userData.username;
 
   useEffect(() => {
-    const listener = ref(database, "users/" + username);
+    const listener = ref(database, "users/" + username.toLowerCase());
     onValue(listener, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();

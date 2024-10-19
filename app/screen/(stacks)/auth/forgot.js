@@ -107,7 +107,7 @@ export default function Forgot({ navigation }) {
   };
 
   const sendData = () => {
-    updatePassword(username, password)
+    updatePassword(username.toLowerCase(), password)
       .then(() => {
         Alert.alert(
           `สมัครสมาชิกสำเร็จ`,
@@ -174,7 +174,7 @@ export default function Forgot({ navigation }) {
                   styles.input,
                   errors.username ? styles.ifError : {},
                 ]}
-                value={username}
+                value={username.toLowerCase()}
                 onChangeText={setUsername}
               />
               {errors.username ? (
