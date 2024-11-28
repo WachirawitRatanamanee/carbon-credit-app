@@ -22,6 +22,10 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+        setUsername(user.email.split("@")[0].trim().toLowerCase());
+        if (username == "") {
+          return;
+        }
         let userData = {};
         const dbRef = ref(database);
         get(child(dbRef, "/users/" + username.toLowerCase()))
@@ -42,12 +46,14 @@ const LoginScreen = ({ navigation }) => {
                   }
                 }
               );
-            } else {
+            } else if (userData.username == username.toLowerCase()) {
               navigation.replace("Tabs", {
                 username: username.toLowerCase(),
                 userData: userData,
                 allUsers: {},
               });
+            } else {
+              Alert.alert("Something went wrong!", "Error");
             }
           })
           .catch((error) => {

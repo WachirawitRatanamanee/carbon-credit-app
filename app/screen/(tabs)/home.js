@@ -18,7 +18,6 @@ import { Element, DetailElement } from "../../../components/element";
 import { LogBox } from "react-native";
 import { ref, onValue, off } from "firebase/database";
 import { database } from "../../../firebase";
-LogBox.ignoreLogs(["Warning:"]); // Ignore log notification by message
 
 export default function HomeScreen({ navigation, route }) {
   const userData = route.params.userData;
@@ -112,7 +111,7 @@ export default function HomeScreen({ navigation, route }) {
 
   const tableHeadWithDescription = data.tableHead.map((tableHead, index) => (
     <Cell
-      key={index}
+      key={`description-${index}`}
       data={
         index === data.tableHead.length - 1 ? (
           <Element
@@ -203,7 +202,7 @@ export default function HomeScreen({ navigation, route }) {
                 {tableData.map((rowData, index) => (
                   <TableWrapper>
                     <TableWrapper
-                      key={index}
+                      key={`row-${index}`}
                       style={[
                         styles.row,
                         {
@@ -213,7 +212,7 @@ export default function HomeScreen({ navigation, route }) {
                     >
                       {rowData.map((cellData, cellIndex) => (
                         <Cell
-                          key={cellIndex}
+                          key={`cell-${index}-${cellIndex}`}
                           data={cellData}
                           textStyle={[
                             styles.tableTextData,
@@ -229,6 +228,7 @@ export default function HomeScreen({ navigation, route }) {
 
                     {isExpand ? (
                       <Cell
+                        key={`detail-${index}`}
                         data={<DetailElement detail={detailData[index]} />}
                         style={[
                           {

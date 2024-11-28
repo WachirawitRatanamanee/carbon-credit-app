@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
-    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/drawer": "^6.6.15",
@@ -26,6 +25,7 @@
     "expo": "~51.0.14",
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.7",
+    "expo-image-picker": "~15.0.5",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.16",
     "expo-splash-screen": "~0.27.5",
@@ -44,8 +44,7 @@
     "react-native-table-component": "https://github.com/slice312/react-native-table-component.git",
     "react-native-web": "~0.19.10",
     "react-navigation-stack": "^2.10.4",
-    "undefined": "@expo/vector-icons/Ionicons",
-    "expo-image-picker": "~15.0.5"
+    "undefined": "@expo/vector-icons/Ionicons"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -70,6 +70,10 @@ export default function Register({ navigation }) {
       errors.username = "รูปแบบชื่อผู้ใช้งานไม่ถูกต้อง";
     }
 
+    if (username === "admin" || username === "Admin" || username === "ADMIN") {
+      errors.username = "ชื่อผู้ใช้งานไม่สามารถใช้ได้";
+    }
+
     if (
       phone.length < 10 ||
       (phone.length > 10 && phone.length < 12)
